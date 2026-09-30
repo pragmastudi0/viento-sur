@@ -24,11 +24,12 @@ export default function Header() {
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
-    <header
-      className={`sticky top-0 z-50 bg-cream/85 backdrop-blur-md transition-all duration-300 ease-soft ${
-        scrolled ? 'border-b border-ink/10 py-2.5' : 'border-b border-transparent py-4'
-      }`}
-    >
+    <>
+      <header
+        className={`sticky top-0 z-50 bg-cream/85 backdrop-blur-md transition-all duration-300 ease-soft ${
+          scrolled ? 'border-b border-ink/10 py-2.5' : 'border-b border-transparent py-4'
+        }`}
+      >
       <div className="container-page flex items-center justify-between gap-4">
         <Link href="/" aria-label="Viento Sur — Inicio" className="shrink-0">
           <Logo size={scrolled ? 30 : 34} />
@@ -69,8 +70,9 @@ export default function Header() {
           </button>
         </div>
       </div>
+      </header>
 
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
-    </header>
+    </>
   );
 }
