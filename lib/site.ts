@@ -23,7 +23,7 @@ export const SITE = {
   description:
     'Lámparas de pie y veladores de diseño, hechos en Argentina. Estructuras de hierro y pantallas que difunden una luz blanca cálida.',
   /** URL pública del sitio (se usa en metadata, sitemap y Open Graph). Actualizar tras el deploy. */
-  url: 'https://vientosur.vercel.app',
+  url: 'https://viento-sur-nu.vercel.app',
   /**
    * Instagram: dejar como null si no hay una URL real.
    * Si se completa con una URL, el enlace aparece automáticamente en el footer.
