@@ -28,5 +28,5 @@ export const SITE = {
    * Instagram: dejar como null si no hay una URL real.
    * Si se completa con una URL, el enlace aparece automáticamente en el footer.
    */
-  instagram: null as string | null,
+  instagram: 'https://www.instagram.com/vientosurluz?stkn=aWljNWFpbjQ2eG9z',
 } as const;
