@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    /* Evita scroll horizontal accidental en cualquier viewport. */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+
+  /* Foco visible y coherente en toda la navegación por teclado. */
+  :focus-visible {
+    outline: 2px solid theme('colors.ink.DEFAULT');
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: theme('colors.sage.DEFAULT');
+    color: theme('colors.ink.deep');
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-content px-5 sm:px-8 lg:px-12;
+  }
+
+  /* Micro-etiqueta funcional (categoría, sección). */
+  .label {
+    @apply text-[0.7rem] uppercase tracking-label text-ink/55 font-semibold;
+  }
+
+  /* Botones */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium
+      transition-colors duration-300 ease-soft disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-lg {
+    @apply px-7 py-3.5;
+  }
+  .btn-md {
+    @apply px-5 py-2.5;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-cream hover:bg-ink-deep;
+  }
+  .btn-outline {
+    @apply btn border border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-cream;
+  }
+  .btn-whatsapp {
+    @apply btn bg-sage-deep text-cream hover:bg-[#5c6c62];
+  }
+
+  /* Enlace con subrayado sutil animado */
+  .link-quiet {
+    @apply relative inline-block text-ink/70 transition-colors hover:text-ink;
+  }
+  .link-quiet::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-current transition-[width] duration-300 ease-soft;
+  }
+  .link-quiet:hover::after,
+  .link-quiet:focus-visible::after {
+    @apply w-full;
+  }
+
+  /* Campos de formulario */
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-ink/80;
+  }
+  .field {
+    @apply w-full rounded-lg border border-ink/15 bg-white/70 px-3.5 py-2.5 text-sm text-ink
+      placeholder:text-ink/35 transition-colors focus:border-ink/40 focus:outline-none
+      focus:ring-2 focus:ring-ink/10;
+  }
+}
