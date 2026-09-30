@@ -8,12 +8,19 @@ import { WhatsAppIcon } from './icons';
 
 interface FormState {
   name: string;
-  locality: string;
+  address: string;
+  province: string;
   phone: string;
   comments: string;
 }
 
-const EMPTY: FormState = { name: '', locality: '', phone: '', comments: '' };
+const EMPTY: FormState = {
+  name: '',
+  address: '',
+  province: '',
+  phone: '',
+  comments: '',
+};
 
 export default function OrderForm({
   open,
@@ -24,7 +31,7 @@ export default function OrderForm({
 }) {
   const { items, subtotal } = useCart();
   const [form, setForm] = useState<FormState>(EMPTY);
-  const [errors, setErrors] = useState<{ name?: boolean; locality?: boolean }>({});
+  const [errors, setErrors] = useState<{ name?: boolean }>({});
   const firstFieldRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -49,10 +56,9 @@ export default function OrderForm({
     e.preventDefault();
     const nextErrors = {
       name: !form.name.trim(),
-      locality: !form.locality.trim(),
     };
     setErrors(nextErrors);
-    if (nextErrors.name || nextErrors.locality) return;
+    if (nextErrors.name) return;
 
     const message = orderMessage(
       items.map((i) => ({
@@ -63,7 +69,8 @@ export default function OrderForm({
       })),
       {
         name: form.name.trim(),
-        locality: form.locality.trim(),
+        address: form.address,
+        province: form.province,
         phone: form.phone,
         comments: form.comments,
       },
@@ -126,22 +133,31 @@ export default function OrderForm({
             </div>
 
             <div>
-              <label htmlFor="of-locality" className="field-label">
-                Localidad <span className="text-ink/40">*</span>
+              <label htmlFor="of-address" className="field-label">
+                Dirección <span className="text-ink/40">(opcional)</span>
               </label>
               <input
-                id="of-locality"
+                id="of-address"
                 type="text"
-                value={form.locality}
-                onChange={update('locality')}
-                autoComplete="address-level2"
-                aria-required="true"
-                aria-invalid={errors.locality || undefined}
+                value={form.address}
+                onChange={update('address')}
+                autoComplete="street-address"
                 className="field"
               />
-              {errors.locality && (
-                <p className="mt-1 text-xs text-ink/70">Ingresá tu localidad.</p>
-              )}
+            </div>
+
+            <div>
+              <label htmlFor="of-province" className="field-label">
+                Provincia <span className="text-ink/40">(opcional)</span>
+              </label>
+              <input
+                id="of-province"
+                type="text"
+                value={form.province}
+                onChange={update('province')}
+                autoComplete="address-level1"
+                className="field"
+              />
             </div>
 
             <div>

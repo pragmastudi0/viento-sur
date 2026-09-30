@@ -10,7 +10,8 @@ export interface WhatsAppOrderItem {
 
 export interface WhatsAppCustomer {
   name: string;
-  locality: string;
+  address?: string;
+  province?: string;
   phone?: string;
   comments?: string;
 }
@@ -62,7 +63,12 @@ export function orderMessage(
   lines.push('');
 
   lines.push(`Nombre: ${customer.name}`);
-  lines.push(`Localidad: ${customer.locality}`);
+  if (customer.address && customer.address.trim()) {
+    lines.push(`Dirección: ${customer.address.trim()}`);
+  }
+  if (customer.province && customer.province.trim()) {
+    lines.push(`Provincia: ${customer.province.trim()}`);
+  }
   if (customer.phone && customer.phone.trim()) {
     lines.push(`Teléfono: ${customer.phone.trim()}`);
   }
