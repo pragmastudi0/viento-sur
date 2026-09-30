@@ -22,17 +22,17 @@ export function waLink(message: string): string {
 
 /** Consulta general por modelos personalizados. */
 export function customInquiryMessage(): string {
-  return 'Hola Viento Sur 👋 quería consultar por una lámpara personalizada.';
+  return 'Hola Viento Sur, quería consultar por una lámpara personalizada.';
 }
 
 /** Consulta por un modelo puntual (botón "Consultar por este modelo"). */
 export function productInquiryMessage(productName: string): string {
-  return `Hola Viento Sur 👋 quería consultar por el modelo ${productName}.`;
+  return `Hola Viento Sur, quería consultar por el modelo ${productName}.`;
 }
 
 /** Consulta general (hero / contacto). */
 export function generalInquiryMessage(): string {
-  return 'Hola Viento Sur 👋 quería hacer una consulta.';
+  return 'Hola Viento Sur, quería hacer una consulta.';
 }
 
 /**
@@ -45,7 +45,7 @@ export function orderMessage(
 ): string {
   const lines: string[] = [];
 
-  lines.push('Hola Viento Sur 👋');
+  lines.push('Hola Viento Sur');
   lines.push('');
   lines.push('Quiero hacer el siguiente pedido:');
   lines.push('');
