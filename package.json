@@ -16,7 +16,8 @@
     "admin:invite": "tsx scripts/create-owner.ts",
     "setup:local": "tsx scripts/setup-local.ts",
     "catalog:sql": "node --import tsx scripts/export-catalog-sql.ts",
-    "catalog:photos": "node --import tsx scripts/prepare-photos.ts"
+    "catalog:photos": "node --import tsx scripts/prepare-photos.ts",
+    "categories:audit": "tsx scripts/audit-categories.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

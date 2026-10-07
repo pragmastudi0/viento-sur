@@ -5,7 +5,7 @@ import ProductGallery from '@/components/ProductGallery';
 import ProductDetails from '@/components/ProductDetails';
 import { waLink, customInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
-import { CATEGORIES } from '@/lib/product-types';
+import { categoryHref } from '@/lib/category-types';
 import { getPublishedProduct } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
@@ -32,11 +32,6 @@ export async function generateMetadata({
   };
 }
 
-const CATEGORY_HREF: Record<string, string> = {
-  'lampara-de-pie': '/lamparas-de-pie',
-  velador: '/veladores',
-};
-
 export default async function ProductPage({
   params,
 }: {
@@ -47,9 +42,6 @@ export default async function ProductPage({
   if (!product) {
     notFound();
   }
-
-  const category = CATEGORIES.find((c) => c.slug === product.category);
-  const categoryHref = CATEGORY_HREF[product.category] ?? '/catalogo';
 
   return (
     <div className="container-page py-8 sm:py-12">
@@ -63,8 +55,8 @@ export default async function ProductPage({
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href={categoryHref} className="transition-colors hover:text-ink">
-              {category?.plural ?? 'Catálogo'}
+            <Link href={categoryHref(product.category)} className="transition-colors hover:text-ink">
+              {product.category.name}
             </Link>
           </li>
           <li aria-hidden="true">/</li>

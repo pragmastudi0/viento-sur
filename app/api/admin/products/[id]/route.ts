@@ -1,6 +1,6 @@
 import { checkOrigin, errorResponse, HttpError, readJson, requireAdmin } from '@/lib/admin';
 import { actionSchema, updateInputSchema } from '@/lib/catalog-validation';
-import { cleanupAssets, updateProduct, validateAssets } from '@/lib/catalog-write';
+import { cleanupAssets, normalizeProductCategory, updateProduct, validateAssets } from '@/lib/catalog-write';
 import { toProduct } from '@/lib/catalog';
 
 type Context = { params: Promise<{ id: string }> };
@@ -10,7 +10,7 @@ export async function PATCH(request: Request, context: Context) {
     checkOrigin(request);
     const { client } = await requireAdmin();
     const { id } = await context.params;
-    const body = await readJson(request);
+    const body = await normalizeProductCategory(client, await readJson(request));
     const full = updateInputSchema.safeParse(body);
     const action = actionSchema.safeParse(body);
     if (!full.success && (!action.success || !action.data.status)) throw new HttpError(400, 'Revisá los datos del formulario.');

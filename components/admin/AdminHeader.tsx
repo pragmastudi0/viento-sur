@@ -17,7 +17,7 @@ export default function AdminHeader() {
   }
   return <header className="border-b border-ink/10"><div className="container-page flex flex-wrap items-center justify-between gap-4 py-5">
     <Link href="/admin" aria-label="Administrador Viento Sur"><Logo /></Link>
-    <nav className="flex items-center gap-4 text-sm"><Link href="/catalogo" target="_blank">Ver catálogo</Link>
+    <nav className="flex flex-wrap items-center gap-4 text-sm"><Link href="/admin">Lámparas</Link><Link href="/admin/categorias">Categorías</Link><Link href="/catalogo" target="_blank">Ver catálogo</Link>
       <button disabled={busy} onClick={logout} className="btn-outline btn-md">{busy ? 'Cerrando…' : 'Cerrar sesión'}</button></nav>
     {error && <p role="alert" className="w-full text-sm">{error}</p>}
   </div></header>;

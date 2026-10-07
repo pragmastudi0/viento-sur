@@ -1,3 +1,5 @@
+import { getActiveCategories } from '@/lib/categories';
+import type { Category } from '@/lib/category-types';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
@@ -31,6 +33,9 @@ const script = localFont({
   display: 'swap',
   variable: '--font-script',
 });
+
+// Navigation must reflect category changes on every request.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -73,11 +78,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let categories: Category[] = []; let categoryError = false;
+  try { categories = await getActiveCategories(); } catch { categoryError = true; console.error('Public category navigation unavailable'); }
   return (
     <html
       lang="es"
@@ -92,7 +99,7 @@ export default function RootLayout({
             >
               Saltar al contenido
             </a>
-            <SiteChrome>{children}</SiteChrome>
+            <SiteChrome categories={categories} categoryError={categoryError}>{children}</SiteChrome>
           </CartProvider>
         </ToastProvider>
       </body>

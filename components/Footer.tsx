@@ -1,17 +1,11 @@
+import type { NavLink } from '@/lib/nav';
 import Link from 'next/link';
 import Logo from './Logo';
 import { SITE, WHATSAPP_DISPLAY } from '@/lib/site';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from './icons';
 
-const FOOTER_LINKS = [
-  { href: '/lamparas-de-pie', label: 'Lámparas de pie' },
-  { href: '/veladores', label: 'Veladores' },
-  { href: '/personalizados', label: 'Personalizados' },
-  { href: '/contacto', label: 'Contacto' },
-];
-
-export default function Footer() {
+export default function Footer({ links }: { links: NavLink[] }) {
   return (
     <footer className="bg-ink-deep text-cream">
       <div className="container-page py-14 sm:py-16">
@@ -26,11 +20,11 @@ export default function Footer() {
           <nav aria-label="Secciones">
             <p className="label text-cream/45">Colección</p>
             <ul className="mt-4 space-y-2.5 text-sm">
-              {FOOTER_LINKS.map((link) => (
+              {links.filter(link => link.href !== '/').map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-cream/75 transition-colors hover:text-cream"
+                    className="break-words text-cream/75 transition-colors hover:text-cream"
                   >
                     {link.label}
                   </Link>
@@ -59,7 +53,7 @@ export default function Footer() {
                     href={SITE.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cream/75 transition-colors hover:text-cream"
+                    className="break-words text-cream/75 transition-colors hover:text-cream"
                   >
                     Instagram
                   </a>
