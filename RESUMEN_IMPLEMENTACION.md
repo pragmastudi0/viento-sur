@@ -112,7 +112,7 @@ El usuario confirmó que aplicó la migración en su proyecto remoto. La comprob
 Durante la implementación y la adaptación a prefijos se verificaron:
 
 - **51 tests unitarios:** precios, validaciones, carrito y procesamiento de imágenes.
-- **15 tests de integración:** CRUD, visibilidad, permisos/RLS, restricciones, reintentos y protección de Storage contra Supabase local real.
+- **17 tests de integración:** CRUD, visibilidad, permisos/RLS, restricciones, reintentos y protección de Storage contra Supabase local real.
 - **21 pruebas E2E:** siete escenarios en escritorio, celular y tablet; incluyen login, CRUD completo, preview/reemplazo, errores de subida, endpoints no autorizados, recuperación y regresión pública.
 - **Lint, TypeScript y build de producción:** aprobados.
 - **Migración repetida:** sin sobrescribir los registros existentes.
@@ -136,7 +136,7 @@ Navegación, filtros, páginas, breadcrumbs, metadata y sitemap leen categorías
 
 1. Respaldo y [`categories-preflight.sql`](supabase/categories-preflight.sql) de solo lectura en la base real. Alternativa complementaria: `npm run categories:audit` con variables de la base destino; informa slugs y colisiones sin escribir.
 2. Revisar categorías detectadas, cantidad de productos y divergencias del esquema.
-3. Ejecutar [`202610070001_categories.sql`](supabase/migrations/202610070001_categories.sql), sin repetir seed ni migración inicial. Agrega dos tablas propias, FK, restricciones, políticas y triggers exclusivos de Viento Sur. Transacción conservadora con comprobación de todos los campos anteriores y preservación de timestamps.
+3. Ejecutar [`202610070001_categories.sql`](supabase/migrations/202610070001_categories.sql), sin repetir seed ni migración inicial. Agrega dos tablas propias, FK, restricciones, políticas y triggers exclusivos de Viento Sur. Un único bloque SQL `DO`, sin tablas temporales, con comprobación de todos los campos anteriores mediante una variable JSONB y preservación de timestamps. Ejecutar el archivo completo. Se verificaron autocommit, repetición y rollback ante un fallo al final del bloque.
 4. Desplegar el código actualizado y probar login → crear categoría → crear producto → catálogo → desactivar/reactivar → bloqueo de eliminación. Los SQL de categorías **no se ejecutaron remotamente** durante esta tarea.
 
 No se cambiaron dependencias, Storage, Auth, carrito, WhatsApp ni objetos de otras aplicaciones. Los scripts de importación inicial/seed se adaptaron para instalaciones nuevas que ya tengan ambas migraciones.

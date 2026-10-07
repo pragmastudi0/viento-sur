@@ -1,6 +1,10 @@
 -- Apply after reviewing categories-preflight.sql on the REAL target database.
--- Transactional and repeatable; only Viento Sur objects are changed.
-begin;
+-- Run the ENTIRE statement, from DO through the final dollar-quote.
+-- One atomic statement; no temporary relations or cross-statement session state.
+-- Repeatable; only Viento Sur objects are changed.
+do $viento_sur_migration$
+declare viento_sur_products_before jsonb;
+begin
 lock table public.viento_sur_products in access exclusive mode;
 
 -- Refuse unexpected predecessor schemas and name collisions before changing anything.
@@ -28,8 +32,8 @@ do $$ begin
   end if;
 end $$;
 
-create temporary table viento_sur_categories_before on commit drop as
-  select id, to_jsonb(p) - 'category_id' as payload from public.viento_sur_products p;
+select coalesce(jsonb_agg(to_jsonb(p) - 'category_id' order by p.id), '[]'::jsonb)
+  into viento_sur_products_before from public.viento_sur_products p;
 
 create table if not exists public.viento_sur_categories (
   id text primary key default gen_random_uuid()::text check (id ~ '^[a-zA-Z0-9-]{1,120}$'),
@@ -136,10 +140,13 @@ alter table public.viento_sur_products disable trigger viento_sur_validate_catal
 update public.viento_sur_products p set category_id = c.id from public.viento_sur_categories c
   where p.category_id is null and (c.legacy_key = p.category or (c.legacy_key is null and c.id = p.category));
 alter table public.viento_sur_products enable trigger viento_sur_validate_catalog_product;
+if viento_sur_products_before is distinct from
+  (select coalesce(jsonb_agg(to_jsonb(p) - 'category_id' order by p.id), '[]'::jsonb)
+    from public.viento_sur_products p) then
+  raise exception 'Product data changed; migration rolled back';
+end if;
 do $$ begin
   if exists (select 1 from public.viento_sur_products where category_id is null) then raise exception 'Unmapped products; migration rolled back'; end if;
-  if exists (select 1 from viento_sur_categories_before b full join public.viento_sur_products p using(id)
-    where b.payload is distinct from (to_jsonb(p) - 'category_id')) then raise exception 'Product data changed; migration rolled back'; end if;
   if not exists (select 1 from pg_catalog.pg_constraint where conname = 'viento_sur_products_category_id_fkey' and conrelid = 'public.viento_sur_products'::regclass) then
     alter table public.viento_sur_products add constraint viento_sur_products_category_id_fkey
       foreign key (category_id) references public.viento_sur_categories(id) on delete restrict;
@@ -176,4 +183,5 @@ for each row execute function public.viento_sur_sync_product_category();
 alter policy viento_sur_products_public_read on public.viento_sur_products
 using (status = 'publicada' and deleted_at is null and exists
   (select 1 from public.viento_sur_categories c where c.id = category_id and c.is_active));
-commit;
+end
+$viento_sur_migration$;

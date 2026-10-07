@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-// Real SQL runs exclusively in this project's local container, always rolled back.
+// Real SQL runs exclusively in this project's local container.
+// Historical fixtures roll back; autocommit checks only reapply the existing migration.
 if (process.env.NEXT_PUBLIC_SUPABASE_URL !== 'http://127.0.0.1:56321') throw new Error('Migración: solo entorno local aislado.');
 function sql(input: string) {
   const result = spawnSync('docker', ['exec', '-i', 'supabase_db_viento-sur', 'psql', '-X', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-qAt'], { input, encoding: 'utf8' });
@@ -9,11 +10,26 @@ function sql(input: string) {
   return result.stdout;
 }
 const source = readFileSync('supabase/migrations/202610070001_categories.sql', 'utf8');
-const migration = source.replace(/^begin;$/m, '').replace(/^commit;$/m, '');
+const migration = source;
+function productsFingerprint() {
+  return sql("select md5(coalesce(jsonb_agg(to_jsonb(p) order by id)::text,'')) from public.viento_sur_products p;");
+}
 describe('Migración SQL conservadora', () => {
+  it('funciona en autocommit sin tablas temporales ni BEGIN separado', () => {
+    const before = productsFingerprint();
+    sql(migration);
+    expect(productsFingerprint()).toBe(before);
+  });
+  it('revierte todo ante un error al final del bloque en autocommit', () => {
+    const before = productsFingerprint();
+    const failing = migration.replace('end\n$viento_sur_migration$;', "update public.viento_sur_products set price = price + 1 where id = 'lanin';\nraise exception 'viento_sur_test_abort';\nend\n$viento_sur_migration$;");
+    expect(failing).not.toBe(migration);
+    expect(() => sql(failing)).toThrow('viento_sur_test_abort');
+    expect(productsFingerprint()).toBe(before);
+  });
   it('es repetible y conserva todos los campos de productos', () => {
     const before = sql("select md5(coalesce(jsonb_agg(to_jsonb(p) order by id)::text,'')) from public.viento_sur_products p;");
-    sql(`begin; ${migration} drop table pg_temp.viento_sur_categories_before; ${migration} rollback;`);
+    sql(`begin; ${migration} ${migration} rollback;`);
     expect(sql("select md5(coalesce(jsonb_agg(to_jsonb(p) order by id)::text,'')) from public.viento_sur_products p;")).toBe(before);
   });
   it('migra esquema anterior, categorías no conocidas, colisiones y soft deletes sin perder campos', () => {
