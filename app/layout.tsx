@@ -1,27 +1,33 @@
 import type { Metadata } from 'next';
-import { Fraunces, Mulish, Caveat } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { SITE } from '@/lib/site';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
 import SiteChrome from '@/components/SiteChrome';
 
-const display = Fraunces({
-  subsets: ['latin'],
-  style: ['normal', 'italic'],
+const display = localFont({
+  src: [
+    { path: './fonts/fraunces-latin-normal.woff2', weight: '100 900', style: 'normal' },
+    { path: './fonts/fraunces-latin-italic.woff2', weight: '100 900', style: 'italic' },
+  ],
   display: 'swap',
   variable: '--font-display',
+  adjustFontFallback: 'Times New Roman',
 });
 
-const sans = Mulish({
-  subsets: ['latin'],
+const sans = localFont({
+  src: './fonts/mulish-latin-normal.woff2',
+  weight: '200 1000',
+  style: 'normal',
   display: 'swap',
   variable: '--font-sans',
 });
 
-const script = Caveat({
-  subsets: ['latin'],
-  weight: ['600', '700'],
+const script = localFont({
+  src: './fonts/caveat-latin-normal.woff2',
+  weight: '600 700',
+  style: 'normal',
   display: 'swap',
   variable: '--font-script',
 });
