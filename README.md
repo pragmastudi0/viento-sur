@@ -8,6 +8,8 @@ Next.js 16.3.8 con App Router, React 19, TypeScript y Tailwind 3; Supabase Postg
 
 Las páginas públicas leen productos publicados desde el servidor sin caché persistente. El administrador escribe mediante endpoints protegidos y JWT de usuario; RLS protege también acceso directo a Supabase. Fotos validadas en backend, subidas con clave de servidor. El carrito sigue en localStorage y verifica productos/precios antes de enviar WhatsApp.
 
+Fraunces, Mulish y Caveat se incluyen en `app/fonts` con sus licencias y se cargan mediante `next/font/local`. El build conserva las tipografías sin depender de respuestas externas de Google Fonts.
+
 La base puede compartirse con otras aplicaciones: las tablas son `public.viento_sur_products`, `public.viento_sur_catalog_admins` y `public.viento_sur_catalog_assets`. Las funciones, índices, secuencia y políticas propias también llevan `viento_sur_`; las fotos usan el bucket exclusivo `viento_sur_catalogo`. La migración y los scripts no renombran ni modifican tablas o buckets de otras aplicaciones. `auth.users` y las tablas de `storage` pertenecen a Supabase y conservan sus nombres.
 
 ## Los SQL para tu proyecto nuevo
