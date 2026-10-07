@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import CollectionView from '@/components/CollectionView';
-import { getProductsByCategory } from '@/data/products';
+import { getPublishedProducts } from '@/lib/catalog';
 
 export const metadata: Metadata = {
   title: 'Veladores',
@@ -9,13 +9,16 @@ export const metadata: Metadata = {
   alternates: { canonical: '/veladores' },
 };
 
-export default function VeladoresPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function VeladoresPage() {
+  const products = await getPublishedProducts('velador');
   return (
     <CollectionView
       eyebrow="Colección"
       title="Veladores"
       subtitle="Lámparas de mesa que suman una luz cálida y cercana a cualquier rincón."
-      products={getProductsByCategory('velador')}
+      products={products}
     />
   );
 }

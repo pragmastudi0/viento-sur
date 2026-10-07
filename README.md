@@ -1,137 +1,111 @@
-# Viento Sur — Sitio web
+# Viento Sur
 
-Sitio de catálogo para **Viento Sur**, marca argentina de lámparas de pie y veladores. Landing + catálogo + páginas de producto + carrito. El pedido **no se paga online**: se cierra por WhatsApp con el mensaje ya armado.
+Catálogo de lámparas con administrador privado. Los pedidos se coordinan por WhatsApp; no hay pagos online. Conserva diseño, categorías, galerías y terminaciones originales.
 
-Hecho con **Next.js 14** (App Router), **React**, **TypeScript** y **Tailwind CSS**. Sin backend ni base de datos. Listo para desplegar en **Vercel**.
+## Arquitectura
 
----
+Next.js 16.3.8 con App Router, React 19, TypeScript y Tailwind 3; Supabase PostgreSQL, Auth y Storage. El proyecto original tenía Next.js 14, React 18 y seis productos hardcodeados. Se actualizaron Next.js y React para resolver vulnerabilidades al incorporar sesiones y operaciones privadas.
 
-## Cómo correrlo en tu computadora
+Las páginas públicas leen productos publicados desde el servidor sin caché persistente. El administrador escribe mediante endpoints protegidos y JWT de usuario; RLS protege también acceso directo a Supabase. Fotos validadas en backend, subidas con clave de servidor. El carrito sigue en localStorage y verifica productos/precios antes de enviar WhatsApp.
 
-Necesitás [Node.js](https://nodejs.org) 18.17 o superior.
+La base puede compartirse con otras aplicaciones: las tablas son `public.viento_sur_products`, `public.viento_sur_catalog_admins` y `public.viento_sur_catalog_assets`. Las funciones, índices, secuencia y políticas propias también llevan `viento_sur_`; las fotos usan el bucket exclusivo `viento_sur_catalogo`. La migración y los scripts no renombran ni modifican tablas o buckets de otras aplicaciones. `auth.users` y las tablas de `storage` pertenecen a Supabase y conservan sus nombres.
+
+## Los SQL para tu proyecto nuevo
+
+1. Crear tu proyecto Supabase y ejecutar `supabase/migrations/202610060001_catalog.sql` en SQL Editor. Crea productos, administradores, registro de fotos, restricciones, RLS y bucket público `viento_sur_catalogo`.
+2. Ejecutar localmente `npm run catalog:photos`. Prepara nueve fotos WebP en `catalog-migration/photos/products/legacy`. Subirlas al bucket `viento_sur_catalogo`, dentro de **products/legacy**, conservando nombres.
+3. Ejecutar `supabase/catalog-seed.sql` en SQL Editor. Migra las seis lámparas sin sobrescribir registros existentes. Verifica primero que estén las nueve fotos; si falta alguna, aborta toda la transacción y no publica productos sin imagen.
+4. Crear/invitar al dueño desde Auth. Para autorizarlo, ejecutar lo siguiente reemplazando el email; la cuenta debe existir primero:
+
+También podés editar el email y ejecutar `supabase/authorize-owner.sql`, que comprueba que la cuenta exista antes de asignarle acceso.
+
+```sql
+insert into public.viento_sur_catalog_admins (user_id)
+select id from auth.users where lower(email) = lower('EMAIL_DEL_DUEÑO')
+on conflict (user_id) do nothing;
+```
+
+Nunca agregar permisos de escritura pública ni políticas de Storage abiertas. Las fotos son públicas; ocultar un producto no vuelve privado un enlace de foto previamente compartido.
+
+Alternativa a subir las fotos y ejecutar el seed manualmente: con las variables remotas configuradas, `npm run catalog:migrate` sube/optimiza las fotos y migra productos. Es repetible: conserva IDs, slugs, precios, galerías y especificaciones; omite productos ya existentes sin sobrescribir ediciones. **No hace falta ejecutar ambos métodos.** `npm run catalog:sql` regenera el SQL desde la fuente de migración.
+
+## Configuración de Auth y Vercel
+
+Copiar `.env.example` a `.env.local` y completar URL de Supabase, clave pública, clave service_role solo de servidor y `SITE_URL` con origen público exacto, incluyendo protocolo. Agregar las mismas variables en Vercel. Nunca versionar ni enviar claves por chat. Producción y previews requieren SITE_URL apropiado a cada origen.
+
+Auth y sus ajustes de registro, SMTP y plantillas son compartidos por todas las aplicaciones del proyecto Supabase. Habilitar login por email/contraseña y agregar `https://TU_DOMINIO/admin/auth/confirm` a las URLs permitidas sin quitar las de otras aplicaciones. En un proyecto dedicado, desactivar **Allow new users to sign up**, configurar Site URL con el origen de SITE_URL y copiar las plantillas `supabase/templates/invite.html` y `recovery.html`. En una base compartida, coordinar esos cambios globales y las plantillas con las otras aplicaciones; una cuenta registrada en otro sitio no obtiene acceso al administrador sin su fila en `viento_sur_catalog_admins`. Configurar SMTP propio para invitación y recuperación en producción.
+
+`npm run admin:invite -- email-del-dueño` autoriza una cuenta existente o invita una nueva para elegir contraseña por email. Si falla la asignación del permiso, repetir el comando. No se genera ni imprime una contraseña.
+
+Desplegar en Vercel después de aplicar esquema y migrar. Comprobar `/admin`, recuperación, seis lámparas y flujo completo desde un teléfono antes de dar por terminado el lanzamiento. Si Supabase está sin configurar, se muestra error: no hay fallback a productos hardcodeados.
+
+## Desarrollo local
+
+Requiere Node.js 22.12+, Docker y Supabase CLI. El entorno usa puertos 56320–56329 y no modifica otros proyectos.
 
 ```bash
-npm install      # instala las dependencias (una sola vez)
-npm run dev      # modo desarrollo → http://localhost:3000
-npm run build    # build de producción
-npm start        # sirve el build de producción
+npm ci
+supabase start -x realtime,edge-runtime,analytics,vector,studio
+npm run setup:local
+npm run catalog:migrate
+npm run dev -- --webpack -p 3005
 ```
 
----
+setup:local escribe credenciales locales directamente en `.env.test.local`, ignorado por git. Crea `.env.local` solo si no existe; nunca reemplaza credenciales reales. La CLI puede mostrar claves locales al iniciar: no publicar su salida. En Auth local, `[auth].enable_signup = false` desactiva registro; `[auth.email].enable_signup = true` mantiene login por email habilitado.
 
-## Lo más importante: dónde editar
+Para usar invitación/recuperación local, configurar `auth.site_url` en `supabase/config.toml` con `http://127.0.0.1:3005` y agregar `http://127.0.0.1:3005/admin/auth/confirm` a `additional_redirect_urls`; reiniciar solamente este proyecto Supabase conservando sus datos. Mailpit recibe los emails locales en `http://127.0.0.1:56324`.
 
-### 1. Número de WhatsApp
-Un solo lugar: **`lib/site.ts`**.
+## Tests
 
-```ts
-export const WHATSAPP_NUMBER = '5493517681444'; // formato internacional, sin + ni espacios
-export const WHATSAPP_DISPLAY = '351 768 1444';  // cómo se muestra en pantalla
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run test:integration
+npm run test:e2e
+npm run build
 ```
 
-El formato para Argentina es `54` + `9` + característica + número. Cambiá los dos valores y todo el sitio (hero, contacto, footer, botón flotante, formulario de pedido) queda actualizado.
+Los tests de integración y E2E exigen Supabase aislado en 127.0.0.1:56321; se niegan a mutar proyectos remotos. Crean/eliminan sus propias cuentas y productos. Playwright comprueba escritorio, celular y tablet; instalar Chromium con `npx playwright install chromium` si hace falta. Inicia servidor en 3005 si no existe. Para comprobar build, usar `npm start -- -p 3005` y repetir E2E contra ese servidor. La cámara física requiere prueba adicional en teléfono real.
 
-### 2. Productos y precios
-Un solo archivo: **`data/products.ts`**. Cada lámpara es un objeto:
+## Flujo del dueño
 
-```ts
-{
-  id: 'lanin',
-  slug: 'lanin',                    // define la URL: /productos/lanin
-  name: 'Lanin',
-  category: 'lampara-de-pie',       // 'lampara-de-pie' | 'velador'
-  categoryLabel: 'Lámpara de pie',
-  price: 78000,                     // solo el número, sin puntos ni símbolo
-  images: [
-    { src: '/products/lanin-1.jpg', alt: 'Descripción de la foto' },
-  ],
-  description: '...',
-  specifications: ['Base de hierro redonda', 'Altura 1,7 m'],
-  variants: STRUCTURE_VARIANTS,     // negro / grafito / bronce (compartidas)
-  featured: true,                   // aparece destacada en el inicio
-}
+Entrar a `/admin`, iniciar sesión y elegir **+ Agregar lámpara**. Completar nombre, descripción, precio, categoría, foto principal y guardar; publicada por defecto. La misma pantalla edita productos y conserva las fotos que no se cambian. Galería y especificaciones son opcionales.
+
+Se aceptan `85000`, `85.000` y `$ 85.000`; los centavos usan coma, por ejemplo `85.000,50`. El precio se almacena como decimal ARS. Categorías: lámpara de pie y velador. Tres terminaciones comunes: negro, grafito y bronce. Se mantiene orden original y las nuevas se agregan al final; no se agregó stock, promociones u orden manual.
+
+**Ocultar/Publicar** cambia visibilidad sin eliminar datos. Los productos ocultos o eliminados no aparecen en inicio, catálogo, categorías, detalle ni sitemap. **Eliminar** pide confirmación y aplica deleted_at; conserva registro y fotos para recuperación operativa. No hay papelera o restauración desde UI en esta versión.
+
+Los fallos conservan el formulario. Crear usa ID estable para evitar duplicados al reintentar. Editar detecta conflictos por fecha de actualización: copiar cambios y recargar si otra operación modificó el producto.
+
+## Fotos y mantenimiento
+
+Hasta diez fotos JPEG, PNG o WebP, de 15 MB por archivo en el dispositivo. El navegador reduce antes de enviar a 1.600 px y hasta 3 MB. El backend comprueba contenido real, tamaño y límite de píxeles; reorienta, elimina metadata y convierte a WebP. HEIC debe exportarse como JPG. La galería persiste referencias path/alt y la primera es principal.
+
+Visitantes y cuentas autenticadas no pueden escribir archivos directamente en Storage. El backend usa clave de servidor solo después de comprobar administrador. En productos usa JWT del administrador y RLS. Al reemplazar fotos, primero guarda referencias nuevas y después elimina las anteriores sin referencias. La base serializa guardados y limpieza; nunca elimina una foto referenciada por otra lámpara o por un producto eliminado lógicamente.
+
+```bash
+npm run catalog:cleanup
 ```
 
-- **Precio:** se escribe como número entero (`78000`) y se muestra formateado automáticamente (`$78.000`).
-- **Agregar un producto:** copiá un bloque, cambiá `id`, `slug`, datos y fotos.
-- **Quitar un producto:** borrá su bloque.
-- **Terminaciones de estructura:** son las mismas para todos y se definen una vez en `STRUCTURE_VARIANTS` (arriba del listado).
+El comando elimina huérfanos de más de 24 horas tras subidas interrumpidas. Ejecutarlo periódicamente desde un entorno seguro o programarlo en infraestructura operativa. No se provisiona cron externo. No borrar storage.objects mediante SQL; usar la API de Storage.
 
-### 3. Fotos
-Van en **`public/products/`**. Referencialas desde `data/products.ts` como `/products/nombre.jpg`.
+Para revocar acceso, eliminar la fila de viento_sur_catalog_admins con conexión privilegiada. Los permisos se consultan en cada operación. Configurar backups de PostgreSQL **y** objetos de Storage según el plan contratado; los backups de base no incluyen una copia de los archivos. Restaurar una lámpara requiere revisar sus fotos y poner deleted_at = null mediante conexión autorizada.
 
-Recomendación: subir imágenes ya optimizadas (ancho máximo ~1500 px, formato JPG). Se muestran recortadas en proporción vertical (4:5).
+## Archivos principales
 
-- **Foto principal del inicio (hero):** `public/products/hero.jpg`
-- **Imagen para compartir en redes (Open Graph):** `public/og.jpg`
+- app/admin y components/admin: login, recuperación, listado y formulario compartido.
+- app/api/admin y proxy.ts: operaciones protegidas y refresco de cookies.
+- lib/catalog*, lib/supabase y lib/product-types.ts: lectura, escritura, validación e interfaces.
+- supabase/migrations y supabase/catalog-seed.sql: esquema, restricciones, políticas y datos originales.
+- scripts: migración, invitación, fotos, SQL, configuración local y limpieza.
+- data/legacy-products.ts: únicamente fuente de migración; ninguna página pública la importa.
+- Páginas públicas, metadata y sitemap: consultas dinámicas que conservan URLs y diseño.
+- lib/site.ts: WhatsApp, marca, Instagram y URL. Hero y personalizados conservan fotos editoriales en public/products.
+- tests: dinero y validación, procesamiento de imágenes, CRUD/RLS/storage real, login, responsive y regresión.
 
-### 4. Textos de secciones
-- **Inicio:** `app/page.tsx`
-- **"Hecho para tu espacio" (personalizados):** `components/CustomProducts.tsx` y `app/personalizados/page.tsx`
-- **"Por qué Viento Sur":** `components/WhyVientoSur.tsx`
-- **Contacto:** `app/contacto/page.tsx`
-- **Tagline y descripción del sitio:** `lib/site.ts`
+## Auditoría y pendientes de operación
 
-### 5. Instagram (opcional)
-En `lib/site.ts`, `instagram` está en `null`. Si ponés una URL real, el enlace aparece solo en el footer y en contacto:
+`npm audit --omit=dev` revisa dependencias de producción. La auditoría completa también incluye dependencias de desarrollo de Tailwind/ESLint; revisar avisos antes de migrarlas y comprobar estilos/build. No usar npm audit fix --force sin revisar cambios mayores.
 
-```ts
-instagram: 'https://instagram.com/tucuenta',
-```
-
----
-
-## Desplegar en Vercel
-
-1. Subí el proyecto a un repositorio de GitHub (o GitLab/Bitbucket).
-2. Entrá a [vercel.com](https://vercel.com), **Add New → Project** e importá el repositorio.
-3. Vercel detecta Next.js solo. No hace falta configurar nada: **Deploy**.
-4. Cuando tengas el dominio final, actualizá `SITE.url` en `lib/site.ts` (se usa en el sitemap y en los datos para compartir en redes) y volvé a desplegar.
-
-Cada vez que hagas un cambio y lo subas al repositorio, Vercel republica el sitio automáticamente.
-
----
-
-## Estructura del proyecto
-
-```
-app/                     Páginas (App Router)
-  page.tsx               Inicio
-  catalogo/              Toda la colección
-  lamparas-de-pie/       Categoría
-  veladores/             Categoría
-  personalizados/        Personalizados
-  contacto/              Contacto
-  productos/[slug]/      Página de cada producto (se genera sola desde data/products.ts)
-  layout.tsx             Estructura común (header, footer, carrito)
-  globals.css            Estilos base y utilidades
-components/              Componentes de interfaz (carrito, tarjetas, hero, etc.)
-context/                 Estado del carrito y de los avisos (toasts)
-data/products.ts         ← EL CATÁLOGO
-lib/
-  site.ts                ← WHATSAPP Y DATOS DEL SITIO
-  whatsapp.ts            Armado de los mensajes de WhatsApp
-  currency.ts            Formato de precios ($)
-  nav.ts                 Enlaces del menú
-public/
-  products/              Fotos de los productos
-  brand/                 Logo (marca)
-  og.jpg                 Imagen para compartir en redes
-```
-
----
-
-## Cómo funciona el pedido
-
-1. La persona agrega productos al carrito (se guarda en su navegador con `localStorage`, así no se pierde al recargar).
-2. En el carrito toca **Continuar pedido** y completa nombre y localidad (teléfono y comentarios son opcionales).
-3. Al enviar, se abre WhatsApp con el mensaje del pedido ya redactado (detalle, cantidades y total).
-4. El cierre —disponibilidad, envío y pago— se coordina por WhatsApp.
-
-> El carrito **no** se vacía solo después de enviar, por si la persona quiere ajustar algo y reenviar.
-
----
-
-## Preparado para el futuro
-
-La estructura permite sumar más adelante, sin rehacer el sitio: base de datos y control de stock, panel de administración para cargar productos, o pagos online. Hoy nada de eso está activo: el catálogo se edita en `data/products.ts` y el pedido se cierra por WhatsApp.
+Crear proyecto remoto, SMTP, cuenta del dueño, variables Vercel, despliegue y prueba en teléfono físico son pasos de lanzamiento que requieren tu configuración. La comprobación local no acredita por sí sola producción.

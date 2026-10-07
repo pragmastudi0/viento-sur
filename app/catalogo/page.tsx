@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import CollectionView from '@/components/CollectionView';
-import { products } from '@/data/products';
+import { getPublishedProducts } from '@/lib/catalog';
 
 export const metadata: Metadata = {
   title: 'Catálogo',
@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   alternates: { canonical: '/catalogo' },
 };
 
-export default function CatalogoPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function CatalogoPage() {
+  const products = await getPublishedProducts();
   return (
     <CollectionView
       eyebrow="Colección"

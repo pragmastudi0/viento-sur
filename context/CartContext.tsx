@@ -96,6 +96,7 @@ interface CartContextValue {
   decrement: (key: string) => void;
   removeItem: (key: string) => void;
   clearCart: () => void;
+  replaceItems: (items: CartItem[]) => void;
   openCart: () => void;
   closeCart: () => void;
 }
@@ -161,6 +162,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     decrement: (key) => dispatch({ type: 'decrement', key }),
     removeItem: (key) => dispatch({ type: 'remove', key }),
     clearCart: () => dispatch({ type: 'clear' }),
+    replaceItems: (items) => dispatch({ type: 'hydrate', items }),
     openCart: () => setIsOpen(true),
     closeCart: () => setIsOpen(false),
   };

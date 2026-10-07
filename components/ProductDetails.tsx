@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Product } from '@/data/products';
+import type { Product } from '@/lib/product-types';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import { formatPrice } from '@/lib/currency';

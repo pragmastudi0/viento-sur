@@ -3,9 +3,12 @@ import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import CustomProducts from '@/components/CustomProducts';
 import WhyVientoSur from '@/components/WhyVientoSur';
-import { products } from '@/data/products';
+import { getPublishedProducts } from '@/lib/catalog';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const products = await getPublishedProducts();
   return (
     <>
       <Hero />

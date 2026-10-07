@@ -1,55 +1,7 @@
-/**
- * ─────────────────────────────────────────────────────────────
- *  CATÁLOGO — fuente única de datos
- * ─────────────────────────────────────────────────────────────
- * Para agregar / editar productos, precios o imágenes, modificá SOLO este
- * archivo. Ningún componente escribe datos de producto por su cuenta.
- *
- * Imágenes: colocá los archivos en /public/products/ y referencialos con la
- * ruta "/products/nombre.jpg". Podés listar varias imágenes por producto.
- */
+/** Migration source only. Never imported by public pages. */
+import { STRUCTURE_VARIANTS, type Product } from '@/lib/product-types';
 
-export type CategorySlug = 'lampara-de-pie' | 'velador';
-
-export interface ProductImage {
-  src: string;
-  alt: string;
-}
-
-export interface Variant {
-  id: string;
-  label: string;
-  /** Color de muestra (swatch) para el selector. */
-  swatch: string;
-}
-
-export interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  category: CategorySlug;
-  categoryLabel: string;
-  price: number;
-  images: ProductImage[];
-  description: string;
-  specifications: string[];
-  variants: Variant[];
-  featured?: boolean;
-}
-
-/** Terminaciones de estructura, compartidas por todos los modelos. */
-export const STRUCTURE_VARIANTS: Variant[] = [
-  { id: 'negro', label: 'Negro', swatch: '#1C1C1C' },
-  { id: 'grafito', label: 'Grafito', swatch: '#4B4B4E' },
-  { id: 'bronce', label: 'Bronce', swatch: '#8C6A43' },
-];
-
-export const CATEGORIES: { slug: CategorySlug; label: string; plural: string }[] = [
-  { slug: 'lampara-de-pie', label: 'Lámpara de pie', plural: 'Lámparas de pie' },
-  { slug: 'velador', label: 'Velador', plural: 'Veladores' },
-];
-
-export const products: Product[] = [
+export const legacyProducts: Omit<Product, 'status' | 'createdAt' | 'updatedAt' | 'sortOrder'>[] = [
   {
     id: 'lanin',
     slug: 'lanin',
@@ -176,21 +128,3 @@ export const products: Product[] = [
     variants: STRUCTURE_VARIANTS,
   },
 ];
-
-/* ── Helpers ──────────────────────────────────────────────── */
-
-export function getProductBySlug(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
-}
-
-export function getProductsByCategory(category: CategorySlug): Product[] {
-  return products.filter((p) => p.category === category);
-}
-
-export function getFeaturedProducts(): Product[] {
-  return products.filter((p) => p.featured);
-}
-
-export function getAllSlugs(): string[] {
-  return products.map((p) => p.slug);
-}

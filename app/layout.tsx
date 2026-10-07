@@ -4,10 +4,7 @@ import './globals.css';
 import { SITE } from '@/lib/site';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import CartDrawer from '@/components/CartDrawer';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import SiteChrome from '@/components/SiteChrome';
 
 const display = Fraunces({
   subsets: ['latin'],
@@ -89,11 +86,7 @@ export default function RootLayout({
             >
               Saltar al contenido
             </a>
-            <Header />
-            <main id="contenido">{children}</main>
-            <Footer />
-            <CartDrawer />
-            <FloatingWhatsApp />
+            <SiteChrome>{children}</SiteChrome>
           </CartProvider>
         </ToastProvider>
       </body>

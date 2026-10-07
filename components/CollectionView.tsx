@@ -1,4 +1,4 @@
-import type { Product } from '@/data/products';
+import type { Product } from '@/lib/product-types';
 import ProductGrid from './ProductGrid';
 
 export default function CollectionView({

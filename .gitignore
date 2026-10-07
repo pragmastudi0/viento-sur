@@ -28,3 +28,9 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+/test-results/
+/playwright-report/
+/supabase/.temp/
+/supabase/.branches/
+/catalog-migration/

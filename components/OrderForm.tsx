@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/currency';
 import { orderMessage, waLink } from '@/lib/whatsapp';
 import { WhatsAppIcon } from './icons';
+import { reconcileCart } from '@/lib/cart-reconciliation';
 
 interface FormState {
   name: string;
@@ -29,7 +30,9 @@ export default function OrderForm({
   open: boolean;
   onClose: () => void;
 }) {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, replaceItems } = useCart();
+  const [checking, setChecking] = useState(false);
+  const [catalogError, setCatalogError] = useState('');
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<{ name?: boolean }>({});
   const firstFieldRef = useRef<HTMLInputElement>(null);
@@ -52,13 +55,30 @@ export default function OrderForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors = {
       name: !form.name.trim(),
     };
     setErrors(nextErrors);
     if (nextErrors.name) return;
+
+    setChecking(true); setCatalogError('');
+    // Open synchronously to preserve the browser's user gesture on mobile.
+    const whatsappWindow = window.open('about:blank', '_blank');
+    if (whatsappWindow) whatsappWindow.opener = null;
+    try {
+      const response = await fetch('/api/catalogo/carrito', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: items.map(i => i.productId) }) });
+      if (!response.ok) throw new Error();
+      const { products } = await response.json();
+      const reconciled = reconcileCart(items, products);
+      if (reconciled.changed) {
+        replaceItems(reconciled.items);
+        setCatalogError('Actualizamos el carrito: cambiaron datos o hay lámparas que ya no están disponibles. Revisá el pedido antes de enviarlo.');
+        whatsappWindow?.close();
+        return;
+      }
+      if (!items.length) { setCatalogError('Agregá una lámpara para enviar el pedido.'); whatsappWindow?.close(); return; }
 
     const message = orderMessage(
       items.map((i) => ({
@@ -77,8 +97,13 @@ export default function OrderForm({
     );
 
     // Abrir WhatsApp. El carrito NO se vacía automáticamente.
-    window.open(waLink(message), '_blank', 'noopener,noreferrer');
+    if (whatsappWindow) whatsappWindow.location.href = waLink(message);
+    else window.location.assign(waLink(message));
     onClose();
+    } catch {
+      whatsappWindow?.close();
+      setCatalogError('No pudimos verificar el catálogo. Revisá tu conexión e intentá nuevamente.');
+    } finally { setChecking(false); }
   };
 
   return (
@@ -212,9 +237,10 @@ export default function OrderForm({
         </div>
 
         <div className="border-t border-ink/10 px-6 py-4">
-          <button type="submit" form="order-form" className="btn-whatsapp btn-lg w-full">
+          {catalogError && <p role="alert" className="mb-3 text-sm text-ink">{catalogError}</p>}
+          <button disabled={checking} type="submit" form="order-form" className="btn-whatsapp btn-lg w-full">
             <WhatsAppIcon />
-            Enviar pedido por WhatsApp
+            {checking ? 'Verificando catálogo…' : 'Enviar pedido por WhatsApp'}
           </button>
           <p className="mt-2.5 text-center text-xs text-ink/50">
             Te llevamos a WhatsApp con el pedido listo para enviar.

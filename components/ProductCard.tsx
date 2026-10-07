@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Product } from '@/data/products';
+import type { Product } from '@/lib/product-types';
 import { formatPrice } from '@/lib/currency';
 
 export default function ProductCard({
@@ -37,6 +37,7 @@ export default function ProductCard({
             {formatPrice(product.price)}
           </span>
         </div>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{product.description}</p>
         <span className="mt-2.5 inline-block text-sm text-ink/60 underline-offset-4 transition-colors group-hover:text-ink group-hover:underline group-focus-visible:text-ink group-focus-visible:underline">
           Ver producto
         </span>

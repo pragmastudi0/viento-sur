@@ -1,0 +1,10 @@
+import { spawnSync } from 'node:child_process';
+import { existsSync, writeFileSync } from 'node:fs';
+const result = spawnSync('supabase', ['status', '--output', 'json'], { encoding: 'utf8' });
+if (result.status !== 0) throw new Error('Iniciá Supabase con supabase start antes de configurar el entorno.');
+const data = JSON.parse(result.stdout);
+if (data.API_URL !== 'http://127.0.0.1:56321') throw new Error('Se requiere el proyecto local Viento Sur en :56321.');
+const env = `NEXT_PUBLIC_SUPABASE_URL=${data.API_URL}\nNEXT_PUBLIC_SUPABASE_ANON_KEY=${data.ANON_KEY}\nSUPABASE_SERVICE_ROLE_KEY=${data.SERVICE_ROLE_KEY}\nSITE_URL=http://127.0.0.1:3005\n`;
+writeFileSync('.env.test.local', env, { mode: 0o600 });
+if (!existsSync('.env.local')) writeFileSync('.env.local', env, { mode: 0o600 });
+console.log('Entorno local configurado sin imprimir credenciales ni reemplazar .env.local existente.');
