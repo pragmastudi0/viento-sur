@@ -6,9 +6,9 @@ import { useEffect, useState } from 'react';
 import Logo from './Logo';
 import CartButton from './CartButton';
 import MobileMenu from './MobileMenu';
-import { NAV_LINKS } from '@/lib/nav';
+import type { NavLink } from '@/lib/nav';
 
-export default function Header() {
+export default function Header({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,14 +35,14 @@ export default function Header() {
           <Logo size={scrolled ? 30 : 34} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden lg:block">
-          <ul className="flex items-center gap-9 text-sm">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
+        <nav aria-label="Principal" className="hidden min-w-0 flex-1 lg:block">
+          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+            {links.map((link) => (
+              <li key={link.href} className="min-w-0 max-w-full">
                 <Link
                   href={link.href}
                   aria-current={isActive(link.href) ? 'page' : undefined}
-                  className={`relative py-1 transition-colors hover:text-ink ${
+                  className={`relative break-words py-1 transition-colors hover:text-ink ${
                     isActive(link.href) ? 'text-ink' : 'text-ink/60'
                   }`}
                 >
@@ -72,7 +72,7 @@ export default function Header() {
       </div>
       </header>
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileMenu links={links} open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   );
 }

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { NAV_LINKS } from '@/lib/nav';
+import type { NavLink } from '@/lib/nav';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import Logo from './Logo';
 import { WhatsAppIcon } from './icons';
@@ -11,7 +11,9 @@ import { WhatsAppIcon } from './icons';
 export default function MobileMenu({
   open,
   onClose,
+  links,
 }: {
+  links: NavLink[];
   open: boolean;
   onClose: () => void;
 }) {
@@ -61,9 +63,9 @@ export default function MobileMenu({
           </button>
         </div>
 
-        <nav aria-label="Principal (móvil)" className="flex-1 px-6 py-6">
+        <nav aria-label="Principal (móvil)" className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           <ul className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => {
+            {links.map((link) => {
               const active =
                 link.href === '/'
                   ? pathname === '/'
@@ -74,7 +76,7 @@ export default function MobileMenu({
                     href={link.href}
                     onClick={onClose}
                     aria-current={active ? 'page' : undefined}
-                    className={`block py-3 font-display text-2xl transition-colors ${
+                    className={`block break-words py-3 font-display text-2xl transition-colors ${
                       active ? 'text-ink' : 'text-ink/70 hover:text-ink'
                     }`}
                   >

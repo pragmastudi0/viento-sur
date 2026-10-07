@@ -1,7 +1,7 @@
 /** Migration source only. Never imported by public pages. */
 import { STRUCTURE_VARIANTS, type Product } from '@/lib/product-types';
 
-export const legacyProducts: Omit<Product, 'status' | 'createdAt' | 'updatedAt' | 'sortOrder'>[] = [
+export const legacyProducts: (Omit<Product, 'status' | 'createdAt' | 'updatedAt' | 'sortOrder' | 'categoryId' | 'category'> & { category: string })[] = [
   {
     id: 'lanin',
     slug: 'lanin',

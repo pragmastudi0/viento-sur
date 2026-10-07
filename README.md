@@ -10,14 +10,15 @@ Las páginas públicas leen productos publicados desde el servidor sin caché pe
 
 Fraunces, Mulish y Caveat se incluyen en `app/fonts` con sus licencias y se cargan mediante `next/font/local`. El build conserva las tipografías sin depender de respuestas externas de Google Fonts.
 
-La base puede compartirse con otras aplicaciones: las tablas son `public.viento_sur_products`, `public.viento_sur_catalog_admins` y `public.viento_sur_catalog_assets`. Las funciones, índices, secuencia y políticas propias también llevan `viento_sur_`; las fotos usan el bucket exclusivo `viento_sur_catalogo`. La migración y los scripts no renombran ni modifican tablas o buckets de otras aplicaciones. `auth.users` y las tablas de `storage` pertenecen a Supabase y conservan sus nombres.
+La base puede compartirse con otras aplicaciones: las tablas son `public.viento_sur_products`, `public.viento_sur_catalog_admins`, `public.viento_sur_catalog_assets`, `public.viento_sur_categories` y `public.viento_sur_category_slugs`. Las funciones, índices, secuencia y políticas propias también llevan `viento_sur_`; las fotos usan el bucket exclusivo `viento_sur_catalogo`. La migración y los scripts no renombran ni modifican tablas o buckets de otras aplicaciones. `auth.users` y las tablas de `storage` pertenecen a Supabase y conservan sus nombres.
 
 ## Los SQL para tu proyecto nuevo
 
 1. Crear tu proyecto Supabase y ejecutar `supabase/migrations/202610060001_catalog.sql` en SQL Editor. Crea productos, administradores, registro de fotos, restricciones, RLS y bucket público `viento_sur_catalogo`.
-2. Ejecutar localmente `npm run catalog:photos`. Prepara nueve fotos WebP en `catalog-migration/photos/products/legacy`. Subirlas al bucket `viento_sur_catalogo`, dentro de **products/legacy**, conservando nombres.
-3. Ejecutar `supabase/catalog-seed.sql` en SQL Editor. Migra las seis lámparas sin sobrescribir registros existentes. Verifica primero que estén las nueve fotos; si falta alguna, aborta toda la transacción y no publica productos sin imagen.
-4. Crear/invitar al dueño desde Auth. Para autorizarlo, ejecutar lo siguiente reemplazando el email; la cuenta debe existir primero:
+2. Ejecutar `supabase/migrations/202610070001_categories.sql`. En una instalación nueva sin productos crea el esquema; el seed siguiente carga las dos categorías originales.
+3. Ejecutar localmente `npm run catalog:photos`. Prepara nueve fotos WebP en `catalog-migration/photos/products/legacy`. Subirlas al bucket `viento_sur_catalogo`, dentro de **products/legacy**, conservando nombres.
+4. Ejecutar `supabase/catalog-seed.sql` en SQL Editor. Migra las seis lámparas sin sobrescribir registros existentes. Verifica primero que estén las nueve fotos; si falta alguna, aborta toda la transacción y no publica productos sin imagen.
+5. Crear/invitar al dueño desde Auth. Para autorizarlo, ejecutar lo siguiente reemplazando el email; la cuenta debe existir primero:
 
 También podés editar el email y ejecutar `supabase/authorize-owner.sql`, que comprueba que la cuenta exista antes de asignarle acceso.
 
@@ -48,6 +49,7 @@ Requiere Node.js 22.12+, Docker y Supabase CLI. El entorno usa puertos 56320–5
 ```bash
 npm ci
 supabase start -x realtime,edge-runtime,analytics,vector,studio
+supabase migration up --local
 npm run setup:local
 npm run catalog:migrate
 npm run dev -- --webpack -p 3005
@@ -74,11 +76,47 @@ Los tests de integración y E2E exigen Supabase aislado en 127.0.0.1:56321; se n
 
 Entrar a `/admin`, iniciar sesión y elegir **+ Agregar lámpara**. Completar nombre, descripción, precio, categoría, foto principal y guardar; publicada por defecto. La misma pantalla edita productos y conserva las fotos que no se cambian. Galería y especificaciones son opcionales.
 
-Se aceptan `85000`, `85.000` y `$ 85.000`; los centavos usan coma, por ejemplo `85.000,50`. El precio se almacena como decimal ARS. Categorías: lámpara de pie y velador. Tres terminaciones comunes: negro, grafito y bronce. Se mantiene orden original y las nuevas se agregan al final; no se agregó stock, promociones u orden manual.
+Se aceptan `85000`, `85.000` y `$ 85.000`; los centavos usan coma, por ejemplo `85.000,50`. El precio se almacena como decimal ARS. Las categorías se administran desde **Categorías**, en `/admin/categorias`; el selector usa categorías activas de la base. Tres terminaciones comunes: negro, grafito y bronce. Se mantiene orden original y las nuevas se agregan al final; no se agregó stock ni promociones; las categorías sí permiten orden manual.
 
-**Ocultar/Publicar** cambia visibilidad sin eliminar datos. Los productos ocultos o eliminados no aparecen en inicio, catálogo, categorías, detalle ni sitemap. **Eliminar** pide confirmación y aplica deleted_at; conserva registro y fotos para recuperación operativa. No hay papelera o restauración desde UI en esta versión.
+**Ocultar/Publicar** cambia visibilidad sin eliminar datos. Los productos ocultos, eliminados o pertenecientes a categorías inactivas no aparecen en inicio, catálogo, categorías, detalle ni sitemap. **Eliminar** pide confirmación y aplica deleted_at; conserva registro y fotos para recuperación operativa. No hay papelera o restauración desde UI en esta versión.
 
 Los fallos conservan el formulario. Crear usa ID estable para evitar duplicados al reintentar. Editar detecta conflictos por fecha de actualización: copiar cambios y recargar si otra operación modificó el producto.
+
+## Categorías dinámicas: actualización de una instalación existente
+
+El esquema anterior guardaba categorías como texto limitado a `lampara-de-pie` y `velador`. El enum TypeScript, el validador, el formulario, la navegación y las dos páginas públicas dependían de esas constantes. Ahora la entidad `Category` y la relación `category_id` son la fuente de verdad; `data/legacy-products.ts` sigue siendo únicamente material de importación inicial.
+
+### Antes de migrar producción
+
+1. Obtener un respaldo de la base. Ejecutar **solo lectura** [`supabase/categories-preflight.sql`](supabase/categories-preflight.sql) en SQL Editor de la base destino. Muestra las categorías reales, nombres/slugs base propuestos, cantidad de productos (incluidos eliminados), columnas, constraints y políticas existentes. Revisar valores vacíos/extraños y cualquier divergencia de esquema; no asumir que producción coincide con local.
+2. Opcional: `npm run categories:audit` con las variables del **proyecto destino** en un entorno seguro. Solo consulta; muestra categorías a crear/conservar y slugs finales con sufijos para colisiones, sin imprimir claves. No ejecutar los tests contra esa base.
+3. Revisar el resultado. La comprobación **local** encontró 4 lámparas de pie y 2 veladores. Estos conteos no acreditan producción. La migración agrega `viento_sur_categories`, `viento_sur_category_slugs` y `category_id` con FK RESTRICT en productos; conserva `category` como compatibilidad temporal.
+4. Ejecutar **únicamente** [`supabase/migrations/202610070001_categories.sql`](supabase/migrations/202610070001_categories.sql). No volver a ejecutar la migración inicial ni el seed para actualizar producción existente. La transacción bloquea brevemente la tabla propia de productos, detecta referencias antiguas únicas, resuelve colisiones, asigna categorías y verifica que todos los demás campos de productos sean idénticos. Ante error aborta; no continuar el despliegue hasta resolverlo. Puede repetirse sin sobrescribir asignaciones posteriores, categorías editadas ni timestamps de productos.
+5. Comparar conteos, IDs, slugs, precios, imágenes, estados y timestamps con el respaldo. Desplegar esta versión **después** del SQL. Las categorías migradas nacen activas y el código anterior continúa aceptando las dos originales durante la transición. Evitar crear categorías/productos nuevos hasta desplegar el código actualizado.
+6. Probar el flujo manual siguiente con la cuenta del dueño. No se aplicó esta migración remotamente como parte de la implementación.
+
+### Modelo y seguridad
+
+`viento_sur_categories`: ID text con UUID generado, `name`, slug único, descripción opcional, `is_active`, `sort_order` entero no negativo y timestamps. `legacy_key` conserva la asociación con el texto anterior y las dos URLs históricas; no es editable desde el panel. `viento_sur_category_slugs` reserva el slug actual y los anteriores para evitar apropiaciones y mantener enlaces.
+
+`viento_sur_products.category_id` es obligatorio. PostgreSQL valida que exista la categoría y bloquea nuevas asignaciones a categorías inactivas, incluso por API directa. Una edición puede conservar su categoría inactiva actual. El trigger mantiene el texto anterior para formularios antiguos; un nombre o slug nuevo no reescribe los productos. FK RESTRICT impide borrar categorías con cualquier producto asociado, incluidos eliminados lógicamente. Solo una categoría vacía puede borrarse físicamente, con confirmación; sus alias se eliminan también.
+
+Lectura pública de metadata/alias permite resolver URLs antiguas e inactivas. Los listados filtran activas. Crear/editar/eliminar requieren el mismo permiso `viento_sur_is_catalog_admin()` y RLS existente. Las escrituras de categorías usan JWT del dueño, no service_role. Los alias se escriben únicamente por trigger con search_path fijo; usuarios no pueden alterar IDs, timestamps o legacy_key. Las ediciones/acciones/borrados usan `updated_at` para rechazar versiones viejas. Todas las nuevas tablas, índices, funciones, triggers y políticas quedan dentro de `viento_sur_*`. Esta migración no cambia Storage, Auth, SMTP ni objetos de otras aplicaciones.
+
+### Visibilidad y URLs
+
+- Una categoría inactiva desaparece de navegación, filtros y sitemap; sus productos publicados desaparecen de inicio, catálogo y sitemap, y sus detalles devuelven 404. **No cambia su estado individual**: reactivar la categoría restaura solamente las lámparas que siguen publicadas y no eliminadas.
+- La página de una categoría inactiva responde 200 con aviso de indisponibilidad y `noindex`, sin productos. Los alias siguen resolviendo. El carrito existente conserva su comportamiento: antes de enviar el pedido verifica disponibilidad y retira productos que ya no son visibles.
+- `/lamparas-de-pie` y `/veladores` siguen como URLs canónicas de las categorías históricas, aunque cambie su nombre/slug. Las nuevas usan `/categorias/[slug]`. Cambiar el slug requiere confirmación, conserva alias anteriores y redirige con HTTP 308. Cambiar el nombre conserva el slug.
+- Orden: `sort_order`, luego ID como desempate estable. Se usa en panel, selector, navegación y filtros. No hay drag & drop.
+
+### Prueba manual
+
+Entrar a `/admin` → **Categorías** → **Crear categoría**. Cargar nombre, revisar slug sugerido, descripción, estado y orden; guardar. Editar su nombre y verificar que el slug se conserva. Crear una lámpara con esa categoría, precio `$85.000` y foto; comprobar catálogo, filtro y detalle. Intentar eliminar la categoría: debe rechazarse. Desactivarla: debe ocultar filtro y producto; verificar el aviso y `noindex` en su página y 404 del producto. Reactivarla y comprobar que el producto vuelve. Cambiar el slug y probar la URL anterior (308). Crear una categoría vacía y comprobar cancelación/confirmación de eliminación. Mantener las seis lámparas originales.
+
+### Verificación local de esta funcionalidad
+
+Lint y TypeScript; 51 tests unitarios; 15 de integración SQL/CRUD/RLS, y 21 E2E (7 escenarios en escritorio, celular y tablet) contra el build de producción local. Incluye alias, orden, asignaciones inactivas/inexistentes, borrado bloqueado, conflicto por versión, acceso directo no autorizado, errores de conexión y regresión de productos/fotos. La migración se prueba dentro de transacciones locales que se revierten, con esquema anterior, colisiones y productos eliminados. Los tests no mutan proyectos remotos; no confundir su resultado con una verificación del despliegue remoto.
 
 ## Fotos y mantenimiento
 
@@ -98,6 +136,7 @@ Para revocar acceso, eliminar la fila de viento_sur_catalog_admins con conexión
 
 - app/admin y components/admin: login, recuperación, listado y formulario compartido.
 - app/api/admin y proxy.ts: operaciones protegidas y refresco de cookies.
+- lib/category* y lib/categories.ts: entidad, consultas, validación y CRUD de categorías.
 - lib/catalog*, lib/supabase y lib/product-types.ts: lectura, escritura, validación e interfaces.
 - supabase/migrations y supabase/catalog-seed.sql: esquema, restricciones, políticas y datos originales.
 - scripts: migración, invitación, fotos, SQL, configuración local y limpieza.

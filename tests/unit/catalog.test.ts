@@ -13,9 +13,9 @@ describe('Importes argentinos', () => {
   it.each(['', '-5', 'NaN', 'Infinity', '0', '8.50', '1,234', '10e5', '85.000foo', '10000000000'])('rechaza %s', value => expect(parsePrice(value)).toBeNull());
 });
 describe('Datos del catálogo', () => {
-  const valid = { name: 'Lámpara Nórdica', description: '', price: 85000, category: 'velador', status: 'publicada', images: [{ path: 'products/owner/foto.webp', alt: 'Lámpara Nórdica' }], specifications: [] };
+  const valid = { name: 'Lámpara Nórdica', description: '', price: 85000, categoryId: 'velador-id', status: 'publicada', images: [{ path: 'products/owner/foto.webp', alt: 'Lámpara Nórdica' }], specifications: [] };
   it('acepta el modelo mínimo', () => expect(productInputSchema.safeParse(valid).success).toBe(true));
-  it.each([{ name: ' ' }, { price: -1 }, { price: 1.234 }, { price: Infinity }, { images: [] }, { status: 'admin' }, { category: 'otra' }, { description: 'x'.repeat(5001) }, { unexpected: true }, { images: [{ path: '../../secret', alt: 'Foto' }] }])('rechaza datos inválidos %j', patch => expect(productInputSchema.safeParse({ ...valid, ...patch }).success).toBe(false));
+  it.each([{ name: ' ' }, { price: -1 }, { price: 1.234 }, { price: Infinity }, { images: [] }, { status: 'admin' }, { categoryId: '../../otra' }, { description: 'x'.repeat(5001) }, { unexpected: true }, { images: [{ path: '../../secret', alt: 'Foto' }] }])('rechaza datos inválidos %j', patch => expect(productInputSchema.safeParse({ ...valid, ...patch }).success).toBe(false));
   it('genera direcciones amigables', () => expect(slugify('Lámpara Nórdica')).toBe('lampara-nordica'));
   it('conserva las seis lámparas, categorías y terminaciones de migración', () => {
     expect(legacyProducts.map(p => p.id)).toEqual(['lanin', 'lanin-xl', 'traful', 'piedra-mora', 'manly', 'kids']);
@@ -23,7 +23,7 @@ describe('Datos del catálogo', () => {
   });
 });
 describe('Carrito actualizado', () => {
-  const p = { ...legacyProducts[0], status: 'publicada', createdAt: '', updatedAt: '', sortOrder: 1 } as Product;
+  const p: Product = { ...legacyProducts[0], categoryId: 'pie-id', category: { id: 'pie-id', name: 'Lámparas de pie', slug: 'lamparas-de-pie', description: '', isActive: true, sortOrder: 1, legacyKey: 'lampara-de-pie', createdAt: '', updatedAt: '' }, status: 'publicada', createdAt: '', updatedAt: '', sortOrder: 1 };
   const item = { productId: p.id, slug: p.slug, name: p.name, price: p.price, image: p.images[0].src, variantId: 'negro', variantLabel: 'Negro', quantity: 2 };
   it('mantiene un carrito vigente', () => expect(reconcileCart([item], [p]).changed).toBe(false));
   it('retira productos ocultos o eliminados', () => expect(reconcileCart([item], []).items).toEqual([]));

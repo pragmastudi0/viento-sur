@@ -13,7 +13,7 @@ export const productInputSchema = z.object({
   description: z.string().trim().max(5000),
   price: z.number().finite().positive().max(9999999999.99)
     .refine(v => Math.abs(v * 100 - Math.round(v * 100)) < 0.0001, 'Usá hasta dos decimales.'),
-  category: z.enum(['lampara-de-pie', 'velador']),
+  categoryId: z.string().regex(/^[a-zA-Z0-9-]{1,120}$/, 'Seleccioná una categoría válida.'),
   status: z.enum(['publicada', 'oculta']),
   images: z.array(imageSchema).min(1, 'Seleccioná una imagen principal.').max(10),
   specifications: z.array(z.string().trim().min(1).max(240)).max(30),

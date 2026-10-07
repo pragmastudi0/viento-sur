@@ -1,4 +1,4 @@
--- Ejecutar DESPUÉS de 202610060001_catalog.sql y de subir las nueve fotos WebP.
+-- Ejecutar DESPUÉS de ambas migraciones (catálogo y categorías) y de subir las nueve fotos WebP.
 -- Ver README: las fotos se pueden preparar con npm run catalog:photos.
 -- Repetible: no sobrescribe lámparas existentes.
 begin;
@@ -31,6 +31,14 @@ select distinct expected.path from (values ('lanin', 'products/legacy/lanin-1.we
 ('kids', 'products/legacy/kids-1.webp')) as expected(product_id, path)
 where not exists (select 1 from public.viento_sur_products where id = expected.product_id)
 on conflict (path) do nothing;
+
+insert into public.viento_sur_categories (name, slug, legacy_key, sort_order)
+select 'Lámparas de pie', 'lamparas-de-pie', 'lampara-de-pie', 1
+where not exists (select 1 from public.viento_sur_categories where legacy_key = 'lampara-de-pie');
+
+insert into public.viento_sur_categories (name, slug, legacy_key, sort_order)
+select 'Veladores', 'veladores', 'velador', 2
+where not exists (select 1 from public.viento_sur_categories where legacy_key = 'velador');
 
 insert into public.viento_sur_products (id, slug, name, description, price, category, images, specifications, featured, status)
 select 'lanin', 'lanin', 'Lanin', 'Una lámpara de pie de brazo curvo que se inclina sobre el ambiente. Su base de hierro redonda y su pantalla impresa en PLA difunden una luz blanca cálida, ideal para acompañar un sillón o un rincón de lectura.', 78000, 'lampara-de-pie', '[{"path":"products/legacy/lanin-1.webp","alt":"Lámpara de pie Lanin de brazo curvo junto a un sillón de madera"},{"path":"products/legacy/lanin-2.webp","alt":"Detalle de la pantalla cónica de la lámpara Lanin con luz cálida"}]'::jsonb, array['Base de hierro redonda', 'Pantalla plástica PLA', 'Luz blanca cálida', 'Altura 1,7 m']::text[], true, 'publicada'

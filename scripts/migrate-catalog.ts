@@ -1,3 +1,4 @@
+import { ensureLegacyCategories } from './legacy-categories';
 import { readFile } from 'node:fs/promises';
 import { legacyProducts } from '../data/legacy-products';
 import { operatorClient } from './env';
@@ -6,6 +7,7 @@ import { BUCKET } from '../lib/catalog-validation';
 
 async function migrate() {
   const client = operatorClient();
+  await ensureLegacyCategories(client);
   let inserted = 0;
   for (const product of legacyProducts) {
     const existing = await client.from('viento_sur_products').select('id').eq('id', product.id).maybeSingle();

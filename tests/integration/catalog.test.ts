@@ -33,13 +33,16 @@ beforeAll(async () => {
   const bytes = await sharp({ create: { width: 20, height: 20, channels: 3, background: 'white' } }).webp().toBuffer();
   const upload = await root.storage.from('viento_sur_catalogo').upload(path, bytes, { contentType: 'image/webp' }); if (upload.error) throw upload.error;
   const registry = await root.from('viento_sur_catalog_assets').insert({ path, uploaded_by: users[0] }); if (registry.error) throw registry.error;
-  input = productInputSchema.parse({ name: 'Lámpara Nórdica integración', description: 'Lámpara de mesa de diseño nórdico.', price: 85000, category: 'velador', status: 'publicada', images: [{ path, alt: 'Nórdica' }], specifications: [] });
+  const category = await root.from('viento_sur_categories').select('id').eq('legacy_key', 'velador').single();
+  if (category.error) throw category.error;
+  input = productInputSchema.parse({ name: 'Lámpara Nórdica integración', description: 'Lámpara de mesa de diseño nórdico.', price: 85000, categoryId: category.data.id, status: 'publicada', images: [{ path, alt: 'Nórdica' }], specifications: [] });
 });
 afterAll(async () => {
   if (ids.length) await root.from('viento_sur_products').delete().in('id', ids);
   if (paths.length) { await root.from('viento_sur_catalog_assets').delete().in('path', paths); await root.storage.from('viento_sur_catalogo').remove(paths); }
   for (const id of users) await root.auth.admin.deleteUser(id);
 });
+function dbInput() { const { categoryId, ...rest } = input; return { ...rest, category_id: categoryId }; }
 describe('CRUD y políticas reales', () => {
   it('crea, conserva reintentos y resuelve slugs duplicados', async () => {
     const id = randomUUID(); ids.push(id);
@@ -66,7 +69,7 @@ describe('CRUD y políticas reales', () => {
   });
   it('bloquea escritura directa de visitantes y cuentas no autorizadas', async () => {
     for (const client of [anon, other]) {
-      const result = await client.from('viento_sur_products').insert({ ...input, slug: `intruder-${randomUUID()}` }); expect(result.error).toBeTruthy();
+      const result = await client.from('viento_sur_products').insert({ ...dbInput(), slug: `intruder-${randomUUID()}` }); expect(result.error).toBeTruthy();
       const update = await client.from('viento_sur_products').update({ price: 1 }).eq('id', ids[0]).select(); expect(update.error || update.data?.length === 0).toBeTruthy();
       expect((await client.from('viento_sur_catalog_admins').insert({ user_id: users[1] })).error).toBeTruthy();
       expect((await client.rpc('viento_sur_is_catalog_admin')).data).toBe(false);
@@ -74,7 +77,7 @@ describe('CRUD y políticas reales', () => {
   });
   it('rechaza campos inválidos e imágenes no verificadas en base de datos', async () => {
     for (const patch of [{ price: -1 }, { price: 1.234 }, { status: 'otra' }, { name: '' }, { images: [] }, { images: [{ path: 'products/evil/file.webp', alt: 'x' }] }]) {
-      const invalid = await owner.from('viento_sur_products').insert({ ...input, ...patch, slug: `invalid-${randomUUID()}` }); expect(invalid.error).toBeTruthy();
+      const invalid = await owner.from('viento_sur_products').insert({ ...dbInput(), ...patch, slug: `invalid-${randomUUID()}` }); expect(invalid.error).toBeTruthy();
     }
   });
   it('bloquea upload y eliminación directa incluso con una cuenta autenticada', async () => {
