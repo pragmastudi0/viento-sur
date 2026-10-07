@@ -8,6 +8,6 @@ async function main() {
     const name = image.src.split('/').pop()!.replace(/\.jpg$/, '.webp');
     await writeFile(`${folder}/${name}`, await optimizeImage(await readFile(`public${image.src}`), 'image/jpeg'));
   }
-  console.log(`Nueve fotos preparadas en ${folder}. Subir al bucket catalogo conservando la carpeta products/legacy.`);
+  console.log(`Nueve fotos preparadas en ${folder}. Subir al bucket viento_sur_catalogo conservando la carpeta products/legacy.`);
 }
 main().catch(e => { console.error(e.message); process.exitCode = 1; });

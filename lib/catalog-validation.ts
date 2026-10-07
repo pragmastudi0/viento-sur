@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BUCKET = 'catalogo';
+export const BUCKET = 'viento_sur_catalogo';
 export const MAX_UPLOAD = 3 * 1024 * 1024;
 export const MAX_ORIGINAL = 15 * 1024 * 1024;
 export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

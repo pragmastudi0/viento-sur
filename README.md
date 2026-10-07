@@ -8,17 +8,19 @@ Next.js 16.3.8 con App Router, React 19, TypeScript y Tailwind 3; Supabase Postg
 
 Las páginas públicas leen productos publicados desde el servidor sin caché persistente. El administrador escribe mediante endpoints protegidos y JWT de usuario; RLS protege también acceso directo a Supabase. Fotos validadas en backend, subidas con clave de servidor. El carrito sigue en localStorage y verifica productos/precios antes de enviar WhatsApp.
 
+La base puede compartirse con otras aplicaciones: las tablas son `public.viento_sur_products`, `public.viento_sur_catalog_admins` y `public.viento_sur_catalog_assets`. Las funciones, índices, secuencia y políticas propias también llevan `viento_sur_`; las fotos usan el bucket exclusivo `viento_sur_catalogo`. La migración y los scripts no renombran ni modifican tablas o buckets de otras aplicaciones. `auth.users` y las tablas de `storage` pertenecen a Supabase y conservan sus nombres.
+
 ## Los SQL para tu proyecto nuevo
 
-1. Crear tu proyecto Supabase y ejecutar `supabase/migrations/202610060001_catalog.sql` en SQL Editor. Crea productos, administradores, registro de fotos, restricciones, RLS y bucket público `catalogo`.
-2. Ejecutar localmente `npm run catalog:photos`. Prepara nueve fotos WebP en `catalog-migration/photos/products/legacy`. Subirlas al bucket `catalogo`, dentro de **products/legacy**, conservando nombres.
+1. Crear tu proyecto Supabase y ejecutar `supabase/migrations/202610060001_catalog.sql` en SQL Editor. Crea productos, administradores, registro de fotos, restricciones, RLS y bucket público `viento_sur_catalogo`.
+2. Ejecutar localmente `npm run catalog:photos`. Prepara nueve fotos WebP en `catalog-migration/photos/products/legacy`. Subirlas al bucket `viento_sur_catalogo`, dentro de **products/legacy**, conservando nombres.
 3. Ejecutar `supabase/catalog-seed.sql` en SQL Editor. Migra las seis lámparas sin sobrescribir registros existentes. Verifica primero que estén las nueve fotos; si falta alguna, aborta toda la transacción y no publica productos sin imagen.
 4. Crear/invitar al dueño desde Auth. Para autorizarlo, ejecutar lo siguiente reemplazando el email; la cuenta debe existir primero:
 
 También podés editar el email y ejecutar `supabase/authorize-owner.sql`, que comprueba que la cuenta exista antes de asignarle acceso.
 
 ```sql
-insert into public.catalog_admins (user_id)
+insert into public.viento_sur_catalog_admins (user_id)
 select id from auth.users where lower(email) = lower('EMAIL_DEL_DUEÑO')
 on conflict (user_id) do nothing;
 ```
@@ -31,7 +33,7 @@ Alternativa a subir las fotos y ejecutar el seed manualmente: con las variables 
 
 Copiar `.env.example` a `.env.local` y completar URL de Supabase, clave pública, clave service_role solo de servidor y `SITE_URL` con origen público exacto, incluyendo protocolo. Agregar las mismas variables en Vercel. Nunca versionar ni enviar claves por chat. Producción y previews requieren SITE_URL apropiado a cada origen.
 
-En Auth, habilitar login por email/contraseña y desactivar **Allow new users to sign up**. Configurar Site URL con el mismo origen de SITE_URL y permitir la URL exacta `https://TU_DOMINIO/admin/auth/confirm`. Configurar SMTP propio para invitación y recuperación en producción. Copiar al dashboard los templates `supabase/templates/invite.html` y `recovery.html`, que usan TokenHash.
+Auth y sus ajustes de registro, SMTP y plantillas son compartidos por todas las aplicaciones del proyecto Supabase. Habilitar login por email/contraseña y agregar `https://TU_DOMINIO/admin/auth/confirm` a las URLs permitidas sin quitar las de otras aplicaciones. En un proyecto dedicado, desactivar **Allow new users to sign up**, configurar Site URL con el origen de SITE_URL y copiar las plantillas `supabase/templates/invite.html` y `recovery.html`. En una base compartida, coordinar esos cambios globales y las plantillas con las otras aplicaciones; una cuenta registrada en otro sitio no obtiene acceso al administrador sin su fila en `viento_sur_catalog_admins`. Configurar SMTP propio para invitación y recuperación en producción.
 
 `npm run admin:invite -- email-del-dueño` autoriza una cuenta existente o invita una nueva para elegir contraseña por email. Si falla la asignación del permiso, repetir el comando. No se genera ni imprime una contraseña.
 
@@ -88,7 +90,7 @@ npm run catalog:cleanup
 
 El comando elimina huérfanos de más de 24 horas tras subidas interrumpidas. Ejecutarlo periódicamente desde un entorno seguro o programarlo en infraestructura operativa. No se provisiona cron externo. No borrar storage.objects mediante SQL; usar la API de Storage.
 
-Para revocar acceso, eliminar la fila de catalog_admins con conexión privilegiada. Los permisos se consultan en cada operación. Configurar backups de PostgreSQL **y** objetos de Storage según el plan contratado; los backups de base no incluyen una copia de los archivos. Restaurar una lámpara requiere revisar sus fotos y poner deleted_at = null mediante conexión autorizada.
+Para revocar acceso, eliminar la fila de viento_sur_catalog_admins con conexión privilegiada. Los permisos se consultan en cada operación. Configurar backups de PostgreSQL **y** objetos de Storage según el plan contratado; los backups de base no incluyen una copia de los archivos. Restaurar una lámpara requiere revisar sus fotos y poner deleted_at = null mediante conexión autorizada.
 
 ## Archivos principales
 

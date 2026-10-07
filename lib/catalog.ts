@@ -21,7 +21,7 @@ export function toProduct(row: ProductRow): Product {
   };
 }
 export const getPublishedProducts = cache(async (category?: CategorySlug): Promise<Product[]> => {
-  let query = publicClient().from('products').select('*').eq('status', 'publicada').is('deleted_at', null)
+  let query = publicClient().from('viento_sur_products').select('*').eq('status', 'publicada').is('deleted_at', null)
     .order('sort_order').order('id');
   if (category) query = query.eq('category', category);
   const { data, error } = await query;
@@ -29,7 +29,7 @@ export const getPublishedProducts = cache(async (category?: CategorySlug): Promi
   return (data as ProductRow[]).map(toProduct);
 });
 export const getPublishedProduct = cache(async (slug: string): Promise<Product | null> => {
-  const { data, error } = await publicClient().from('products').select('*').eq('slug', slug)
+  const { data, error } = await publicClient().from('viento_sur_products').select('*').eq('slug', slug)
     .eq('status', 'publicada').is('deleted_at', null).maybeSingle();
   if (error) throw new Error('No se pudo cargar la lámpara.');
   return data ? toProduct(data as ProductRow) : null;

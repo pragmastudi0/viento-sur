@@ -19,9 +19,9 @@ async function main() {
   await walk('products');
   for (let i = 0; i < allPaths.length; i += 100) {
     const paths = allPaths.slice(i, i + 100);
-    const pruned = await client.rpc('prune_catalog_assets', { p_paths: paths, p_before: before });
+    const pruned = await client.rpc('viento_sur_prune_catalog_assets', { p_paths: paths, p_before: before });
     if (pruned.error) throw pruned.error;
-    const remaining = await client.from('catalog_assets').select('path').in('path', paths);
+    const remaining = await client.from('viento_sur_catalog_assets').select('path').in('path', paths);
     if (remaining.error) throw remaining.error;
     const registered = new Set(remaining.data.map(a => a.path));
     const orphans = paths.filter(p => !registered.has(p));

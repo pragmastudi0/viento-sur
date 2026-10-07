@@ -10,7 +10,7 @@ const nextConfig = {
       protocol: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).protocol.replace(':', ''),
       hostname: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname,
       port: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).port,
-      pathname: '/storage/v1/object/public/catalogo/products/**',
+      pathname: '/storage/v1/object/public/viento_sur_catalogo/products/**',
     }] : [],
   },
 };

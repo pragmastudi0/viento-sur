@@ -9,6 +9,6 @@ begin
   if owner_id is null then
     raise exception 'Primero creá la cuenta del dueño en Auth y reemplazá el email de este SQL.';
   end if;
-  insert into public.catalog_admins (user_id) values (owner_id)
+  insert into public.viento_sur_catalog_admins (user_id) values (owner_id)
   on conflict (user_id) do nothing;
 end $$;

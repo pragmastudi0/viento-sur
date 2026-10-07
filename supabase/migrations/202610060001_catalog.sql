@@ -1,28 +1,28 @@
-create table public.catalog_admins (
+create table public.viento_sur_catalog_admins (
   user_id uuid primary key references auth.users(id) on delete cascade
 );
-alter table public.catalog_admins enable row level security;
-revoke all on public.catalog_admins from anon, authenticated;
+alter table public.viento_sur_catalog_admins enable row level security;
+revoke all on public.viento_sur_catalog_admins from anon, authenticated;
 
-create or replace function public.is_catalog_admin() returns boolean
+create or replace function public.viento_sur_is_catalog_admin() returns boolean
 language sql stable security definer set search_path = '' as $$
-  select exists (select 1 from public.catalog_admins where user_id = auth.uid());
+  select exists (select 1 from public.viento_sur_catalog_admins where user_id = auth.uid());
 $$;
-revoke all on function public.is_catalog_admin() from public;
-grant execute on function public.is_catalog_admin() to anon, authenticated, service_role;
+revoke all on function public.viento_sur_is_catalog_admin() from public;
+grant execute on function public.viento_sur_is_catalog_admin() to anon, authenticated, service_role;
 
 -- Only the validated server upload pipeline can register assets.
-create table public.catalog_assets (
+create table public.viento_sur_catalog_assets (
   path text primary key check (path ~ '^products/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+\.webp$'),
   uploaded_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now()
 );
-alter table public.catalog_assets enable row level security;
-revoke all on public.catalog_assets from anon, authenticated;
-grant select on public.catalog_assets to authenticated;
-create policy assets_admin_read on public.catalog_assets for select to authenticated using (public.is_catalog_admin());
+alter table public.viento_sur_catalog_assets enable row level security;
+revoke all on public.viento_sur_catalog_assets from anon, authenticated;
+grant select on public.viento_sur_catalog_assets to authenticated;
+create policy viento_sur_assets_admin_read on public.viento_sur_catalog_assets for select to authenticated using (public.viento_sur_is_catalog_admin());
 
-create table public.products (
+create table public.viento_sur_products (
   id text primary key default gen_random_uuid()::text check (id ~ '^[a-zA-Z0-9-]{1,120}$'),
   slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) <= 120),
   name text not null check (length(btrim(name)) between 1 and 120),
@@ -38,27 +38,27 @@ create table public.products (
   updated_at timestamptz not null default clock_timestamp(),
   deleted_at timestamptz
 );
-create index products_public_order on public.products (sort_order, id) where status = 'publicada' and deleted_at is null;
-alter table public.products enable row level security;
-revoke all on public.products from anon, authenticated;
-grant select on public.products to anon, authenticated;
-grant insert, update on public.products to authenticated;
-grant usage, select on sequence public.products_sort_order_seq to authenticated;
-grant all on public.products, public.catalog_admins, public.catalog_assets to service_role;
-grant usage, select on sequence public.products_sort_order_seq to service_role;
-create policy products_public_read on public.products for select to anon, authenticated
+create index viento_sur_products_public_order on public.viento_sur_products (sort_order, id) where status = 'publicada' and deleted_at is null;
+alter table public.viento_sur_products enable row level security;
+revoke all on public.viento_sur_products from anon, authenticated;
+grant select on public.viento_sur_products to anon, authenticated;
+grant insert, update on public.viento_sur_products to authenticated;
+grant usage, select on sequence public.viento_sur_products_sort_order_seq to authenticated;
+grant all on public.viento_sur_products, public.viento_sur_catalog_admins, public.viento_sur_catalog_assets to service_role;
+grant usage, select on sequence public.viento_sur_products_sort_order_seq to service_role;
+create policy viento_sur_products_public_read on public.viento_sur_products for select to anon, authenticated
   using (status = 'publicada' and deleted_at is null);
-create policy products_admin_read on public.products for select to authenticated using (public.is_catalog_admin());
-create policy products_admin_insert on public.products for insert to authenticated with check (public.is_catalog_admin());
-create policy products_admin_update on public.products for update to authenticated using (public.is_catalog_admin()) with check (public.is_catalog_admin());
+create policy viento_sur_products_admin_read on public.viento_sur_products for select to authenticated using (public.viento_sur_is_catalog_admin());
+create policy viento_sur_products_admin_insert on public.viento_sur_products for insert to authenticated with check (public.viento_sur_is_catalog_admin());
+create policy viento_sur_products_admin_update on public.viento_sur_products for update to authenticated using (public.viento_sur_is_catalog_admin()) with check (public.viento_sur_is_catalog_admin());
 
-create or replace function public.validate_catalog_product() returns trigger
+create or replace function public.viento_sur_validate_catalog_product() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare item jsonb; spec text;
 begin
   -- Serializes attachment and orphan pruning, so cleanup cannot remove an image
   -- concurrently being attached by another save.
-  perform pg_catalog.pg_advisory_xact_lock(61006001);
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('viento_sur_catalog_assets', 0));
   if tg_op = 'UPDATE' then
     if new.id <> old.id or new.slug <> old.slug or new.created_at <> old.created_at then
       raise exception 'Product identity is immutable' using errcode = '23514';
@@ -70,7 +70,7 @@ begin
       or item - 'path' - 'alt' <> '{}'::jsonb
       or jsonb_typeof(item->'path') <> 'string' or jsonb_typeof(item->'alt') <> 'string'
       or length(btrim(item->>'alt')) not between 1 and 240
-      or not exists (select 1 from public.catalog_assets where path = item->>'path') then
+      or not exists (select 1 from public.viento_sur_catalog_assets where path = item->>'path') then
       raise exception 'Invalid catalog image' using errcode = '23514';
     end if;
   end loop;
@@ -85,25 +85,25 @@ begin
   return new;
 end;
 $$;
-revoke all on function public.validate_catalog_product() from public;
-create trigger validate_catalog_product before insert or update on public.products
-  for each row execute function public.validate_catalog_product();
+revoke all on function public.viento_sur_validate_catalog_product() from public;
+create trigger viento_sur_validate_catalog_product before insert or update on public.viento_sur_products
+  for each row execute function public.viento_sur_validate_catalog_product();
 
-create or replace function public.prune_catalog_assets(p_paths text[], p_before timestamptz)
+create or replace function public.viento_sur_prune_catalog_assets(p_paths text[], p_before timestamptz)
 returns table(path text) language plpgsql security definer set search_path = '' as $$
 begin
-  perform pg_catalog.pg_advisory_xact_lock(61006001);
-  return query delete from public.catalog_assets a
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('viento_sur_catalog_assets', 0));
+  return query delete from public.viento_sur_catalog_assets a
     where a.path = any(p_paths) and a.created_at < p_before
-    and not exists (select 1 from public.products p where p.images @> jsonb_build_array(jsonb_build_object('path', a.path)))
+    and not exists (select 1 from public.viento_sur_products p where p.images @> jsonb_build_array(jsonb_build_object('path', a.path)))
     returning a.path;
 end;
 $$;
-revoke all on function public.prune_catalog_assets(text[], timestamptz) from public, anon, authenticated;
-grant execute on function public.prune_catalog_assets(text[], timestamptz) to service_role;
+revoke all on function public.viento_sur_prune_catalog_assets(text[], timestamptz) from public, anon, authenticated;
+grant execute on function public.viento_sur_prune_catalog_assets(text[], timestamptz) to service_role;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('catalogo', 'catalogo', true, 3145728, array['image/webp'])
+values ('viento_sur_catalogo', 'viento_sur_catalogo', true, 3145728, array['image/webp'])
 on conflict (id) do update set public = true, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 -- No authenticated/anonymous write policies: all file content is validated in
 -- the server before the server-only service role writes to this dedicated bucket.

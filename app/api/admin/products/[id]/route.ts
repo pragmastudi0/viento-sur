@@ -17,7 +17,7 @@ export async function PATCH(request: Request, context: Context) {
     if (full.success) {
       const { updatedAt, ...input } = full.data;
       await validateAssets(client, input);
-      const old = await client.from('products').select('images').eq('id', id).single();
+      const old = await client.from('viento_sur_products').select('images').eq('id', id).single();
       if (old.error) throw new HttpError(404, 'No encontramos esta lámpara.');
       const product = await updateProduct(client, id, updatedAt, input);
       const replaced = old.data.images.map((i: { path: string }) => i.path).filter((p: string) => !input.images.some(i => i.path === p));

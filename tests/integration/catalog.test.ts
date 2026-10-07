@@ -22,7 +22,7 @@ beforeAll(async () => {
     if (created.error || !created.data.user) throw created.error;
     users.push(created.data.user.id);
     if (role === 'owner') {
-      const permission = await root.from('catalog_admins').insert({ user_id: created.data.user.id });
+      const permission = await root.from('viento_sur_catalog_admins').insert({ user_id: created.data.user.id });
       if (permission.error) throw permission.error;
     }
     const client = createClient(url, anonKey, { auth: { persistSession: false } });
@@ -31,13 +31,13 @@ beforeAll(async () => {
   }
   const path = `products/${users[0]}/${randomUUID()}.webp`; paths.push(path);
   const bytes = await sharp({ create: { width: 20, height: 20, channels: 3, background: 'white' } }).webp().toBuffer();
-  const upload = await root.storage.from('catalogo').upload(path, bytes, { contentType: 'image/webp' }); if (upload.error) throw upload.error;
-  const registry = await root.from('catalog_assets').insert({ path, uploaded_by: users[0] }); if (registry.error) throw registry.error;
+  const upload = await root.storage.from('viento_sur_catalogo').upload(path, bytes, { contentType: 'image/webp' }); if (upload.error) throw upload.error;
+  const registry = await root.from('viento_sur_catalog_assets').insert({ path, uploaded_by: users[0] }); if (registry.error) throw registry.error;
   input = productInputSchema.parse({ name: 'Lámpara Nórdica integración', description: 'Lámpara de mesa de diseño nórdico.', price: 85000, category: 'velador', status: 'publicada', images: [{ path, alt: 'Nórdica' }], specifications: [] });
 });
 afterAll(async () => {
-  if (ids.length) await root.from('products').delete().in('id', ids);
-  if (paths.length) { await root.from('catalog_assets').delete().in('path', paths); await root.storage.from('catalogo').remove(paths); }
+  if (ids.length) await root.from('viento_sur_products').delete().in('id', ids);
+  if (paths.length) { await root.from('viento_sur_catalog_assets').delete().in('path', paths); await root.storage.from('viento_sur_catalogo').remove(paths); }
   for (const id of users) await root.auth.admin.deleteUser(id);
 });
 describe('CRUD y políticas reales', () => {
@@ -57,36 +57,36 @@ describe('CRUD y políticas reales', () => {
     expect(row.images).toEqual(input.images); expect(row.slug).toBe(slug);
     await expect(updateProduct(owner, id, stale, { price: 1 })).rejects.toThrow('cambió');
     row = await updateProduct(owner, id, row.updated_at, { status: 'oculta' });
-    expect((await anon.from('products').select('id').eq('id', id)).data).toEqual([]);
-    expect((await owner.from('products').select('id').eq('id', id)).data).toHaveLength(1);
+    expect((await anon.from('viento_sur_products').select('id').eq('id', id)).data).toEqual([]);
+    expect((await owner.from('viento_sur_products').select('id').eq('id', id)).data).toHaveLength(1);
     row = await updateProduct(owner, id, row.updated_at, { status: 'publicada' });
-    expect((await anon.from('products').select('id').eq('id', id)).data).toHaveLength(1);
+    expect((await anon.from('viento_sur_products').select('id').eq('id', id)).data).toHaveLength(1);
     row = await updateProduct(owner, id, row.updated_at, { deleted_at: new Date().toISOString() });
-    expect(row.deleted_at).toBeTruthy(); expect((await anon.from('products').select('id').eq('id', id)).data).toEqual([]);
+    expect(row.deleted_at).toBeTruthy(); expect((await anon.from('viento_sur_products').select('id').eq('id', id)).data).toEqual([]);
   });
   it('bloquea escritura directa de visitantes y cuentas no autorizadas', async () => {
     for (const client of [anon, other]) {
-      const result = await client.from('products').insert({ ...input, slug: `intruder-${randomUUID()}` }); expect(result.error).toBeTruthy();
-      const update = await client.from('products').update({ price: 1 }).eq('id', ids[0]).select(); expect(update.error || update.data?.length === 0).toBeTruthy();
-      expect((await client.from('catalog_admins').insert({ user_id: users[1] })).error).toBeTruthy();
-      expect((await client.rpc('is_catalog_admin')).data).toBe(false);
+      const result = await client.from('viento_sur_products').insert({ ...input, slug: `intruder-${randomUUID()}` }); expect(result.error).toBeTruthy();
+      const update = await client.from('viento_sur_products').update({ price: 1 }).eq('id', ids[0]).select(); expect(update.error || update.data?.length === 0).toBeTruthy();
+      expect((await client.from('viento_sur_catalog_admins').insert({ user_id: users[1] })).error).toBeTruthy();
+      expect((await client.rpc('viento_sur_is_catalog_admin')).data).toBe(false);
     }
   });
   it('rechaza campos inválidos e imágenes no verificadas en base de datos', async () => {
     for (const patch of [{ price: -1 }, { price: 1.234 }, { status: 'otra' }, { name: '' }, { images: [] }, { images: [{ path: 'products/evil/file.webp', alt: 'x' }] }]) {
-      const invalid = await owner.from('products').insert({ ...input, ...patch, slug: `invalid-${randomUUID()}` }); expect(invalid.error).toBeTruthy();
+      const invalid = await owner.from('viento_sur_products').insert({ ...input, ...patch, slug: `invalid-${randomUUID()}` }); expect(invalid.error).toBeTruthy();
     }
   });
   it('bloquea upload y eliminación directa incluso con una cuenta autenticada', async () => {
     for (const client of [anon, other, owner]) {
-      const uploaded = await client.storage.from('catalogo').upload(`products/${users[0]}/bad.webp`, Buffer.from('fake'), { contentType: 'image/webp' }); expect(uploaded.error).toBeTruthy();
-      await client.storage.from('catalogo').remove(paths);
-      expect((await root.storage.from('catalogo').download(paths[0])).error).toBeNull();
+      const uploaded = await client.storage.from('viento_sur_catalogo').upload(`products/${users[0]}/bad.webp`, Buffer.from('fake'), { contentType: 'image/webp' }); expect(uploaded.error).toBeTruthy();
+      await client.storage.from('viento_sur_catalogo').remove(paths);
+      expect((await root.storage.from('viento_sur_catalogo').download(paths[0])).error).toBeNull();
     }
   });
   it('no elimina fotos compartidas ni de productos borrados lógicamente', async () => {
     await cleanupAssets(paths);
-    expect((await root.from('catalog_assets').select('*').eq('path', paths[0])).data).toHaveLength(1);
-    expect((await root.storage.from('catalogo').download(paths[0])).error).toBeNull();
+    expect((await root.from('viento_sur_catalog_assets').select('*').eq('path', paths[0])).data).toHaveLength(1);
+    expect((await root.storage.from('viento_sur_catalogo').download(paths[0])).error).toBeNull();
   });
 });

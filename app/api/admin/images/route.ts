@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const path = `products/${user.id}/${randomUUID()}.webp`;
     const { error } = await client.storage.from(BUCKET).upload(path, bytes, { contentType: 'image/webp', upsert: false });
     if (error) throw new HttpError(503, 'No pudimos subir la foto. Intentá nuevamente.');
-    const registered = await client.from('catalog_assets').insert({ path, uploaded_by: user.id });
+    const registered = await client.from('viento_sur_catalog_assets').insert({ path, uploaded_by: user.id });
     if (registered.error) {
       await client.storage.from(BUCKET).remove([path]);
       throw new HttpError(503, 'No pudimos guardar la foto. Intentá nuevamente.');

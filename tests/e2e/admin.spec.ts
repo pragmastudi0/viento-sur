@@ -11,18 +11,18 @@ test.beforeEach(async () => {
   email = `e2e-${randomUUID()}@example.test`; password = `Test-${randomUUID()}`;
   const { data, error } = await root.auth.admin.createUser({ email, password, email_confirm: true });
   if (error) throw error; userId = data.user!.id;
-  const authorized = await root.from('catalog_admins').insert({ user_id: userId }); if (authorized.error) throw authorized.error;
+  const authorized = await root.from('viento_sur_catalog_admins').insert({ user_id: userId }); if (authorized.error) throw authorized.error;
 });
 test.afterEach(async () => {
   if (!userId) return;
-  const assets = await root.from('catalog_assets').select('path').eq('uploaded_by', userId);
+  const assets = await root.from('viento_sur_catalog_assets').select('path').eq('uploaded_by', userId);
   for (const asset of assets.data || []) {
     // JSONB containment must use JSON, not the SDK's PostgreSQL array encoding.
-    const removed = await root.from('products').delete().contains('images', JSON.stringify([{ path: asset.path }]));
+    const removed = await root.from('viento_sur_products').delete().contains('images', JSON.stringify([{ path: asset.path }]));
     if (removed.error) throw removed.error;
   }
   const paths = (assets.data || []).map(a => a.path);
-  if (paths.length) { await root.from('catalog_assets').delete().in('path', paths); await root.storage.from('catalogo').remove(paths); }
+  if (paths.length) { await root.from('viento_sur_catalog_assets').delete().in('path', paths); await root.storage.from('viento_sur_catalogo').remove(paths); }
   await root.auth.admin.deleteUser(userId);
 });
 async function photo(color = '#332D52') {
@@ -48,7 +48,7 @@ test('flujo completo con persistencia, preview, reemplazo, publicación y elimin
   await page.screenshot({ path: `test-results/form-${info.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Guardar lámpara' }).click();
   await expect(page.getByText('✓ Lámpara agregada correctamente')).toBeVisible();
-  let record = (await root.from('products').select('*').eq('name', name).single()).data;
+  let record = (await root.from('viento_sur_products').select('*').eq('name', name).single()).data;
   expect(record.price).toBe(85000);
   const slug = record.slug; const originalPath = record.images[0].path;
   await page.reload(); await expect(page.getByText(name, { exact: true }).filter({ visible: true })).toBeVisible();
@@ -59,14 +59,14 @@ test('flujo completo con persistencia, preview, reemplazo, publicación y elimin
   await page.goto(`/admin/${record.id}/editar`);
   await page.getByLabel('Precio en pesos *', { exact: true }).fill('90.000');
   await page.getByRole('button', { name: 'Guardar lámpara' }).click(); await expect(page.getByText('✓ Lámpara editada correctamente')).toBeVisible();
-  record = (await root.from('products').select('*').eq('id', record.id).single()).data;
+  record = (await root.from('viento_sur_products').select('*').eq('id', record.id).single()).data;
   expect(record.images[0].path).toBe(originalPath); expect(record.slug).toBe(slug);
   await page.goto(`/admin/${record.id}/editar`);
   await page.getByLabel('Reemplazar foto 1').setInputFiles(await photo('#99A89D'));
   await page.getByRole('button', { name: 'Guardar lámpara' }).click(); await expect(page.getByText('✓ Lámpara editada correctamente')).toBeVisible();
-  record = (await root.from('products').select('*').eq('id', record.id).single()).data;
+  record = (await root.from('viento_sur_products').select('*').eq('id', record.id).single()).data;
   expect(record.images[0].path).not.toBe(originalPath);
-  expect((await root.storage.from('catalogo').download(originalPath)).error).toBeTruthy();
+  expect((await root.storage.from('viento_sur_catalogo').download(originalPath)).error).toBeTruthy();
   const visibleRow = () => page.locator('tr, article').filter({ hasText: name }).filter({ visible: true });
   await visibleRow().getByRole('button', { name: 'Ocultar', exact: true }).click(); await expect(page.getByText('✓ Lámpara oculta correctamente')).toBeVisible();
   await page.goto('/catalogo'); await expect(page.getByRole('heading', { name, exact: true })).toHaveCount(0);
@@ -77,7 +77,7 @@ test('flujo completo con persistencia, preview, reemplazo, publicación y elimin
   await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click(); await expect(visibleRow()).toBeVisible();
   await visibleRow().getByRole('button', { name: 'Eliminar', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Eliminar lámpara' }).click();
   await expect(page.getByText('✓ Lámpara eliminada correctamente')).toBeVisible();
-  await expect(visibleRow()).toHaveCount(0); expect((await root.from('products').select('deleted_at').eq('id', record.id).single()).data?.deleted_at).toBeTruthy();
+  await expect(visibleRow()).toHaveCount(0); expect((await root.from('viento_sur_products').select('deleted_at').eq('id', record.id).single()).data?.deleted_at).toBeTruthy();
   await page.goto('/catalogo'); await expect(page.getByRole('heading', { name, exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
@@ -92,7 +92,7 @@ test('rechaza formatos y conserva formulario cuando falla la subida', async ({ p
   await page.getByRole('button', { name: 'Guardar lámpara' }).click(); await expect(page.getByRole('main').getByRole('alert')).toContainText('No pudimos subir');
   await expect(page.getByLabel('Nombre *', { exact: true })).toHaveValue('Foto de prueba');
   await expect(page.getByAltText('Preview de foto 1')).toBeVisible();
-  expect((await root.from('products').select('id').eq('name', 'Foto de prueba')).data).toEqual([]);
+  expect((await root.from('viento_sur_products').select('id').eq('name', 'Foto de prueba')).data).toEqual([]);
 });
 test('protege endpoints, sesión, origen y cuentas sin permisos', async ({ page, request }) => {
   await page.goto('/admin'); await expect(page).toHaveURL(/\/admin\/login/);
@@ -105,7 +105,7 @@ test('protege endpoints, sesión, origen y cuentas sin permisos', async ({ page,
   expect((await page.request.post('/api/admin/products', { headers, data: { name: 'hack', price: -1 } })).status()).toBe(400);
   const spoofed = await page.request.post('/api/admin/images', { headers, multipart: { file: { name: 'fake.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('script') } } }); expect(spoofed.status()).toBe(400);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click(); await expect(page).toHaveURL(/\/admin\/login/);
-  await root.from('catalog_admins').delete().eq('user_id', userId);
+  await root.from('viento_sur_catalog_admins').delete().eq('user_id', userId);
   await page.getByLabel('Email', { exact: true }).fill(email); await page.getByLabel('Contraseña', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click(); await expect(page.getByRole('main').getByRole('alert')).toContainText('no tiene acceso');
 });

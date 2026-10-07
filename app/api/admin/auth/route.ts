@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       } else {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw new HttpError(error.status === 429 ? 429 : 401, 'No pudimos iniciar sesión. Revisá el email y la contraseña o intentá más tarde.');
-        const permission = await client.rpc('is_catalog_admin');
+        const permission = await client.rpc('viento_sur_is_catalog_admin');
         if (permission.error || !permission.data) {
           await client.auth.signOut();
           throw new HttpError(403, 'Esta cuenta no tiene acceso al administrador.');

@@ -9,7 +9,7 @@ export async function requireAdmin() {
   const client = await sessionClient();
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) throw new HttpError(401, 'Tu sesión terminó. Volvé a iniciar sesión.');
-  const { data, error: permissionError } = await client.rpc('is_catalog_admin');
+  const { data, error: permissionError } = await client.rpc('viento_sur_is_catalog_admin');
   if (permissionError) throw new HttpError(503, 'No pudimos verificar tu acceso. Intentá nuevamente.');
   if (!data) throw new HttpError(403, 'Esta cuenta no tiene acceso al administrador.');
   return { client, user };

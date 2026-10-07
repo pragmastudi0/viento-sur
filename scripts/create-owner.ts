@@ -16,7 +16,7 @@ async function main() {
     user = data.user;
   }
   if (!user) throw new Error('No se pudo provisionar la cuenta.');
-  const { error } = await client.from('catalog_admins').upsert({ user_id: user.id });
+  const { error } = await client.from('viento_sur_catalog_admins').upsert({ user_id: user.id });
   if (error) throw error;
   console.log('Cuenta autorizada. Si es nueva, recibirá un enlace para elegir su contraseña.');
 }
