@@ -7,11 +7,14 @@ const formatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
   currency: 'ARS',
   minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
+  maximumFractionDigits: 2,
 });
 
 export function formatPrice(value: number): string {
   // Intl agrega un espacio duro ("$ 78.000") en algunos entornos; lo quitamos
   // para respetar el estilo de la marca ("$78.000").
-  return formatter.format(value).replace(/\s/g, '');
+  const formatted = Number.isInteger(value) ? formatter.format(value) : new Intl.NumberFormat('es-AR', {
+    style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2,
+  }).format(value);
+  return formatted.replace(/\s/g, '');
 }

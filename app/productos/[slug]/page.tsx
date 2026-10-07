@@ -5,20 +5,20 @@ import ProductGallery from '@/components/ProductGallery';
 import ProductDetails from '@/components/ProductDetails';
 import { waLink, customInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
-import { getProductBySlug, getAllSlugs, CATEGORIES } from '@/data/products';
+import { CATEGORIES } from '@/lib/product-types';
+import { getPublishedProduct } from '@/lib/catalog';
 
-export function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
-}
+export const dynamic = 'force-dynamic';
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
-}): Metadata {
-  const product = getProductBySlug(params.slug);
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getPublishedProduct(slug);
   if (!product) {
-    return { title: 'Producto no encontrado' };
+    notFound();
   }
   return {
     title: product.name,
@@ -37,12 +37,13 @@ const CATEGORY_HREF: Record<string, string> = {
   velador: '/veladores',
 };
 
-export default function ProductPage({
+export default async function ProductPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const product = getProductBySlug(params.slug);
+  const { slug } = await params;
+  const product = await getPublishedProduct(slug);
   if (!product) {
     notFound();
   }

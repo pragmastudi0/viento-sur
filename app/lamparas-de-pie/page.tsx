@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import CollectionView from '@/components/CollectionView';
-import { getProductsByCategory } from '@/data/products';
+import { getPublishedProducts } from '@/lib/catalog';
 
 export const metadata: Metadata = {
   title: 'Lámparas de pie',
@@ -9,13 +9,16 @@ export const metadata: Metadata = {
   alternates: { canonical: '/lamparas-de-pie' },
 };
 
-export default function LamparasDePiePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function LamparasDePiePage() {
+  const products = await getPublishedProducts('lampara-de-pie');
   return (
     <CollectionView
       eyebrow="Colección"
       title="Lámparas de pie"
       subtitle="Piezas de gran presencia para iluminar y acompañar los espacios de estar."
-      products={getProductsByCategory('lampara-de-pie')}
+      products={products}
     />
   );
 }
