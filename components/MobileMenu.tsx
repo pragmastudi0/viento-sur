@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import type { NavLink } from '@/lib/nav';
+import type { NavItem } from '@/lib/nav';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import Logo from './Logo';
 import { WhatsAppIcon } from './icons';
@@ -13,7 +13,7 @@ export default function MobileMenu({
   onClose,
   links,
 }: {
-  links: NavLink[];
+  links: NavItem[];
   open: boolean;
   onClose: () => void;
 }) {
@@ -82,6 +82,27 @@ export default function MobileMenu({
                   >
                     {link.label}
                   </Link>
+                  {!!link.children?.length && (
+                    <ul className="mb-1 ml-3 border-l border-ink/10 pl-4">
+                      {link.children.map((child) => {
+                        const childActive = pathname.startsWith(child.href);
+                        return (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href}
+                              onClick={onClose}
+                              aria-current={childActive ? 'page' : undefined}
+                              className={`block break-words py-2 text-lg transition-colors ${
+                                childActive ? 'text-ink' : 'text-ink/60 hover:text-ink'
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </li>
               );
             })}
