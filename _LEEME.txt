@@ -1,0 +1,19 @@
+CAMBIOS VIENTO SUR — navbar dropdown · pedido directo WhatsApp · footer Pragma
+=============================================================================
+
+ARCHIVOS A REEMPLAZAR (7) — copiá estos sobre los del repo original,
+respetando la carpeta:
+
+  components/CartDrawer.tsx
+  components/Footer.tsx
+  components/Header.tsx
+  components/MobileMenu.tsx
+  components/SiteChrome.tsx
+  lib/nav.ts
+  lib/whatsapp.ts
+
+ARCHIVO A ELIMINAR (1) — borralo del repo original:
+
+  components/OrderForm.tsx   (ya no se usa; el pedido va directo a WhatsApp)
+
+Nada más cambió. Typecheck, lint (0 warnings) y build pasan OK.
