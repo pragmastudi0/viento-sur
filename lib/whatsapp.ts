@@ -42,7 +42,7 @@ export function generalInquiryMessage(): string {
  */
 export function orderMessage(
   items: WhatsAppOrderItem[],
-  customer: WhatsAppCustomer,
+  customer?: WhatsAppCustomer,
 ): string {
   const lines: string[] = [];
 
@@ -60,23 +60,28 @@ export function orderMessage(
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   lines.push(`TOTAL: ${formatPrice(total)}`);
-  lines.push('');
 
-  lines.push(`Nombre: ${customer.name}`);
-  if (customer.address && customer.address.trim()) {
-    lines.push(`Dirección: ${customer.address.trim()}`);
-  }
-  if (customer.province && customer.province.trim()) {
-    lines.push(`Provincia: ${customer.province.trim()}`);
-  }
-  if (customer.phone && customer.phone.trim()) {
-    lines.push(`Teléfono: ${customer.phone.trim()}`);
-  }
-
-  if (customer.comments && customer.comments.trim()) {
-    lines.push('');
-    lines.push('Comentarios:');
-    lines.push(customer.comments.trim());
+  // Los datos del cliente son opcionales: si no se cargan, el pedido se envía
+  // igual y se coordina el resto por el chat.
+  if (customer) {
+    if (customer.name && customer.name.trim()) {
+      lines.push('');
+      lines.push(`Nombre: ${customer.name.trim()}`);
+    }
+    if (customer.address && customer.address.trim()) {
+      lines.push(`Dirección: ${customer.address.trim()}`);
+    }
+    if (customer.province && customer.province.trim()) {
+      lines.push(`Provincia: ${customer.province.trim()}`);
+    }
+    if (customer.phone && customer.phone.trim()) {
+      lines.push(`Teléfono: ${customer.phone.trim()}`);
+    }
+    if (customer.comments && customer.comments.trim()) {
+      lines.push('');
+      lines.push('Comentarios:');
+      lines.push(customer.comments.trim());
+    }
   }
 
   lines.push('');
