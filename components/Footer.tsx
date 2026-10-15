@@ -63,8 +63,9 @@ export default function Footer({ links }: { links: NavLink[] }) {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-cream/15 pt-6 text-xs text-cream/45">
+        <div className="mt-12 flex flex-col gap-2 border-t border-cream/15 pt-6 text-xs text-cream/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Viento Sur. Lámparas de diseño, Argentina.</p>
+          <p>Desarrollado por <span className="font-medium text-cream/70">Pragma</span></p>
         </div>
       </div>
     </footer>
