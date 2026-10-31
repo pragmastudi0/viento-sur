@@ -12,8 +12,16 @@ export default function Hero() {
         alt="Lámpara de pie Lanin encendida junto a un sillón en un ambiente cálido"
         fill
         priority
-        sizes="100vw"
-        className="object-cover object-[60%_center]"
+        sizes="(min-width: 1024px) 1px, 100vw"
+        className="object-cover object-[60%_center] lg:hidden"
+      />
+      <Image
+        src="/products/hero-desktop.jpg"
+        alt="Lámpara encendida que proyecta una luz cálida sobre la pared"
+        fill
+        priority
+        sizes="(min-width: 1024px) 100vw, 1px"
+        className="hidden object-cover object-center lg:block"
       />
       {/* Overlay sutil solo para legibilidad del texto, anclado abajo/izquierda. */}
       <div className="absolute inset-0 bg-gradient-to-t from-ink-deep/70 via-ink-deep/10 to-transparent" />
