@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
-import BrandStorySection from '@/components/BrandStorySection';
 import CustomProducts from '@/components/CustomProducts';
 import WhyVientoSur from '@/components/WhyVientoSur';
 import { getPublishedProducts } from '@/lib/catalog';
@@ -46,8 +45,6 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-
-      <BrandStorySection />
 
       <CustomProducts />
 

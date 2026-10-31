@@ -5,16 +5,16 @@ const STORY_IMAGE = '/products/lanin-2.jpg';
 
 export default function BrandStorySection() {
   return (
-    <section aria-labelledby="brand-story-title" className="container-page pb-16 sm:pb-24">
-      <div className="grid gap-8 border-t border-ink/15 pt-12 sm:gap-10 sm:pt-16 lg:grid-cols-2 lg:items-center lg:gap-x-16">
+    <section aria-labelledby="brand-story-title" className="container-page py-16 sm:py-24">
+      <div className="grid gap-8 sm:gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-16">
         <header className="lg:col-start-1 lg:row-start-1">
           <p className="label">Viento Sur</p>
-          <h2
+          <h1
             id="brand-story-title"
             className="mt-3 max-w-lg font-display text-3xl font-light leading-tight text-ink sm:text-4xl"
           >
             Diseñadas y fabricadas en Córdoba
-          </h2>
+          </h1>
         </header>
 
         <figure className="relative aspect-[4/5] overflow-hidden sm:aspect-[5/4] lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:aspect-[4/5]">
