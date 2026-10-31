@@ -8,7 +8,14 @@ import { getPublishedProducts } from '@/lib/catalog';
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const products = await getPublishedProducts();
+  let products: Awaited<ReturnType<typeof getPublishedProducts>> = [];
+  let catalogError = false;
+  try {
+    products = await getPublishedProducts();
+  } catch (error) {
+    catalogError = true;
+    console.error('Home catalog unavailable', error);
+  }
   return (
     <>
       <Hero />
@@ -21,13 +28,21 @@ export default async function HomePage() {
               Lámparas que dan carácter al ambiente.
             </h2>
           </div>
-          <Link href="/catalogo" className="link-quiet">
-            Ver toda la colección
-          </Link>
+          {!catalogError && (
+            <Link href="/catalogo" className="link-quiet">
+              Ver toda la colección
+            </Link>
+          )}
         </header>
 
         <div className="mt-12">
-          <ProductGrid products={products} priorityCount={3} />
+          {catalogError ? (
+            <p role="alert" className="text-sm text-ink/70">
+              No pudimos cargar la colección. Volvé a intentar en unos minutos.
+            </p>
+          ) : (
+            <ProductGrid products={products} priorityCount={3} />
+          )}
         </div>
       </section>
 
