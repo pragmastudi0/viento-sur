@@ -8,6 +8,9 @@ import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
 import SiteChrome from '@/components/SiteChrome';
 
+const HOME_URL = new URL('/', SITE.url).toString();
+const SOCIAL_IMAGE = '/og/viento-sur-og.jpg';
+
 const display = localFont({
   src: [
     { path: './fonts/fraunces-latin-normal.woff2', weight: '100 900', style: 'normal' },
@@ -53,20 +56,21 @@ export const metadata: Metadata = {
     'Argentina',
   ],
   authors: [{ name: 'Viento Sur' }],
-  alternates: { canonical: '/' },
+  alternates: { canonical: HOME_URL },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     siteName: 'Viento Sur',
     title: 'Viento Sur | Lámparas de diseño',
     description: SITE.description,
-    url: SITE.url,
+    url: HOME_URL,
     images: [
       {
-        url: '/og.jpg',
+        url: SOCIAL_IMAGE,
         width: 1200,
         height: 630,
-        alt: 'Viento Sur — Iluminación que transforma espacios',
+        alt: 'Lámpara de pie Viento Sur encendida en un ambiente cálido',
+        type: 'image/jpeg',
       },
     ],
   },
@@ -74,7 +78,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Viento Sur | Lámparas de diseño',
     description: SITE.description,
-    images: ['/og.jpg'],
+    images: [SOCIAL_IMAGE],
   },
 };
 

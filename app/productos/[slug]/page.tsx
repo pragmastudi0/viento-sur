@@ -7,6 +7,7 @@ import { waLink, customInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
 import { categoryHref } from '@/lib/category-types';
 import { getPublishedProduct } from '@/lib/catalog';
+import { SITE } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,14 +21,27 @@ export async function generateMetadata({
   if (!product) {
     notFound();
   }
+  const title = `${product.name} | Viento Sur`;
+  const url = new URL(`/productos/${product.slug}`, SITE.url).toString();
+  const image = product.images[0];
   return {
     title: product.name,
     description: product.description,
-    alternates: { canonical: `/productos/${product.slug}` },
+    alternates: { canonical: url },
     openGraph: {
-      title: `${product.name} | Viento Sur`,
+      type: 'website',
+      locale: 'es_AR',
+      siteName: SITE.name,
+      title,
       description: product.description,
-      images: [{ url: product.images[0].src }],
+      url,
+      images: [{ url: image.src, alt: image.alt }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: product.description,
+      images: [image.src],
     },
   };
 }

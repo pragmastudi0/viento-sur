@@ -21,7 +21,7 @@ export const SITE = {
   name: 'Viento Sur',
   tagline: 'Iluminación que transforma espacios.',
   description:
-    'Lámparas de pie y veladores de diseño, hechos en Argentina. Estructuras de hierro y pantallas que difunden una luz blanca cálida.',
+    'Iluminación de diseño creada y fabricada en Córdoba. Lámparas impresas en 3D para darle calidez y personalidad a cada espacio.',
   /** URL pública del sitio (se usa en metadata, sitemap y Open Graph). Actualizar tras el deploy. */
   url: process.env.SITE_URL || 'https://viento-sur-nu.vercel.app',
   /**
