@@ -2,6 +2,7 @@ import { getActiveCategories } from '@/lib/categories';
 import type { Category } from '@/lib/category-types';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { SITE } from '@/lib/site';
 import { CartProvider } from '@/context/CartContext';
@@ -106,6 +107,7 @@ export default async function RootLayout({
             <SiteChrome categories={categories} categoryError={categoryError}>{children}</SiteChrome>
           </CartProvider>
         </ToastProvider>
+        <Analytics />
       </body>
     </html>
   );
