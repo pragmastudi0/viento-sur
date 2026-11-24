@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import JsonLd from '@/components/JsonLd';
+import { SITE } from '@/lib/site';
+import { organizationJsonLd, pageMetadata, websiteJsonLd } from '@/lib/seo';
 import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import CustomProducts from '@/components/CustomProducts';
@@ -6,6 +10,13 @@ import WhyVientoSur from '@/components/WhyVientoSur';
 import { getPublishedProducts } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
+
+const HOME_TITLE = 'Viento Sur | Lámparas de diseño hechas en Córdoba';
+
+export const metadata: Metadata = {
+  ...pageMetadata({ title: HOME_TITLE, socialTitle: HOME_TITLE, description: SITE.description, path: '/' }),
+  title: { absolute: HOME_TITLE },
+};
 
 export default async function HomePage() {
   let products: Awaited<ReturnType<typeof getPublishedProducts>> = [];
@@ -18,6 +29,7 @@ export default async function HomePage() {
   }
   return (
     <>
+      <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       <Hero />
 
       <section className="container-page py-16 sm:py-24">
@@ -29,7 +41,7 @@ export default async function HomePage() {
             </h2>
           </div>
           {!catalogError && (
-            <Link href="/catalogo" className="link-quiet">
+            <Link href="/catalogo" className="link-quiet" data-cta="home_ver_toda_coleccion">
               Ver toda la colección
             </Link>
           )}

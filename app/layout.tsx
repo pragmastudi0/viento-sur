@@ -2,15 +2,18 @@ import { getActiveCategories } from '@/lib/categories';
 import type { Category } from '@/lib/category-types';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { SITE } from '@/lib/site';
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo';
+import { consentBootstrapScript, gaMeasurementId } from '@/lib/consent';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CartProvider } from '@/context/CartContext';
 import { ToastProvider } from '@/context/ToastContext';
 import SiteChrome from '@/components/SiteChrome';
 
-const HOME_URL = new URL('/', SITE.url).toString();
-const SOCIAL_IMAGE = '/og/viento-sur-og.jpg';
+const HOME_TITLE = 'Viento Sur | Lámparas de diseño hechas en Córdoba';
+const GA_ID = gaMeasurementId();
+const GOOGLE_SITE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION?.trim() || undefined;
 
 const display = localFont({
   src: [
@@ -41,45 +44,33 @@ const script = localFont({
 // Navigation must reflect category changes on every request.
 export const dynamic = 'force-dynamic';
 
+// Valores por defecto del sitio. El canonical NO se define acá: cada página
+// declara el suyo (ver lib/seo.ts) para no heredar el de la home.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: 'Viento Sur | Lámparas de diseño',
+    default: HOME_TITLE,
     template: '%s | Viento Sur',
   },
   description: SITE.description,
-  keywords: [
-    'lámparas de pie',
-    'veladores',
-    'lámparas de diseño',
-    'iluminación',
-    'Viento Sur',
-    'Argentina',
-  ],
-  authors: [{ name: 'Viento Sur' }],
-  alternates: { canonical: HOME_URL },
+  applicationName: SITE.name,
+  authors: [{ name: SITE.name }],
+  creator: SITE.name,
+  formatDetection: { telephone: false, email: false, address: false },
+  verification: GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : undefined,
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    siteName: 'Viento Sur',
-    title: 'Viento Sur | Lámparas de diseño',
+    siteName: SITE.name,
+    title: HOME_TITLE,
     description: SITE.description,
-    url: HOME_URL,
-    images: [
-      {
-        url: SOCIAL_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: 'Lámpara de pie Viento Sur encendida en un ambiente cálido',
-        type: 'image/jpeg',
-      },
-    ],
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Viento Sur | Lámparas de diseño',
+    title: HOME_TITLE,
     description: SITE.description,
-    images: [SOCIAL_IMAGE],
+    images: [DEFAULT_SOCIAL_IMAGE.url],
   },
 };
 
@@ -92,10 +83,15 @@ export default async function RootLayout({
   try { categories = await getActiveCategories(); } catch { categoryError = true; console.error('Public category navigation unavailable'); }
   return (
     <html
-      lang="es"
+      lang="es-AR"
       className={`${display.variable} ${sans.variable} ${script.variable}`}
     >
+      <head>
+        {/* Consent Mode v2: valores por defecto ANTES de cualquier etiqueta de Google. */}
+        <script id="consent-default" dangerouslySetInnerHTML={{ __html: consentBootstrapScript() }} />
+      </head>
       <body className="min-h-screen">
+        <ConsentProvider gaId={GA_ID}>
         <ToastProvider>
           <CartProvider>
             <a
@@ -107,7 +103,7 @@ export default async function RootLayout({
             <SiteChrome categories={categories} categoryError={categoryError}>{children}</SiteChrome>
           </CartProvider>
         </ToastProvider>
-        <Analytics />
+        </ConsentProvider>
       </body>
     </html>
   );

@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 import { SITE, WHATSAPP_DISPLAY } from '@/lib/site';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Contacto',
   description:
-    'Comunicate con Viento Sur por WhatsApp para consultas sobre modelos, pedidos, tiempos de entrega y formas de pago.',
-  alternates: { canonical: '/contacto' },
-};
+    'Comunicate con Viento Sur por WhatsApp para consultas sobre lámparas, pedidos, tiempos de entrega y formas de pago. Diseñamos y fabricamos en Córdoba, Argentina.',
+  path: '/contacto',
+});
 
 export default function ContactoPage() {
   return (
@@ -23,8 +24,11 @@ export default function ContactoPage() {
           un pedido o resolver dudas sobre tiempos de entrega y formas de pago.
           Te respondemos a la brevedad.
         </p>
+        <p className="mt-3 text-base leading-relaxed text-ink/65">
+          Diseñamos y fabricamos nuestras lámparas en Córdoba Capital, Argentina.
+        </p>
 
-        <div className="mt-8 flex flex-col items-start gap-4">
+        <div className="mt-8 flex flex-col items-start gap-4" data-analytics-location="contact_page">
           <a
             href={waLink(generalInquiryMessage())}
             target="_blank"
@@ -47,7 +51,7 @@ export default function ContactoPage() {
                 rel="noopener noreferrer"
                 className="link-quiet"
               >
-                @vientosur
+                {SITE.instagramHandle}
               </a>
             </p>
           )}

@@ -7,7 +7,9 @@ import { waLink, customInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
 import { categoryHref } from '@/lib/category-types';
 import { getPublishedProduct } from '@/lib/catalog';
-import { SITE } from '@/lib/site';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbJsonLd, pageMetadata, productJsonLd } from '@/lib/seo';
+import ProductViewTracker from '@/components/ProductViewTracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,29 +23,14 @@ export async function generateMetadata({
   if (!product) {
     notFound();
   }
-  const title = `${product.name} | Viento Sur`;
-  const url = new URL(`/productos/${product.slug}`, SITE.url).toString();
   const image = product.images[0];
-  return {
-    title: product.name,
+  return pageMetadata({
+    title: `${product.name} – ${product.categoryLabel}`,
+    socialTitle: `${product.name} | Viento Sur`,
     description: product.description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: 'website',
-      locale: 'es_AR',
-      siteName: SITE.name,
-      title,
-      description: product.description,
-      url,
-      images: [{ url: image.src, alt: image.alt }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description: product.description,
-      images: [image.src],
-    },
-  };
+    path: `/productos/${product.slug}`,
+    image: image ? { url: image.src, alt: image.alt } : undefined,
+  });
 }
 
 export default async function ProductPage({
@@ -57,8 +44,14 @@ export default async function ProductPage({
     notFound();
   }
 
+  const categoryPath = categoryHref(product.category);
   return (
     <div className="container-page py-8 sm:py-12">
+      <JsonLd data={[
+        productJsonLd({ name: product.name, slug: product.slug, description: product.description, price: product.price, images: product.images.map(i => i.src), category: product.categoryLabel }),
+        breadcrumbJsonLd([{ name: 'Inicio', path: '/' }, { name: product.category.name, path: categoryPath }, { name: product.name, path: `/productos/${product.slug}` }]),
+      ]} />
+      <ProductViewTracker item={{ item_id: product.slug, item_name: product.name, item_category: product.categoryLabel, price: product.price }} />
       {/* Breadcrumb */}
       <nav aria-label="Migas de pan" className="text-sm text-ink/50">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -69,7 +62,7 @@ export default async function ProductPage({
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href={categoryHref(product.category)} className="transition-colors hover:text-ink">
+            <Link href={categoryPath} className="transition-colors hover:text-ink">
               {product.category.name}
             </Link>
           </li>
@@ -86,7 +79,7 @@ export default async function ProductPage({
       </div>
 
       {/* CTA personalizados */}
-      <section className="mt-20 border-t border-ink/10 pt-12 sm:mt-28">
+      <section className="mt-20 border-t border-ink/10 pt-12 sm:mt-28" data-analytics-location="product_custom_cta">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-xl">
             <h2 className="font-display text-2xl font-light text-ink">
@@ -99,6 +92,7 @@ export default async function ProductPage({
           </div>
           <a
             href={waLink(customInquiryMessage())}
+            data-inquiry="custom"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp btn-lg shrink-0"

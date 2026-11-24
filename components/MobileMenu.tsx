@@ -112,6 +112,7 @@ export default function MobileMenu({
         <div className="border-t border-ink/10 p-6">
           <a
             href={waLink(generalInquiryMessage())}
+            data-analytics-location="mobile_menu"
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}

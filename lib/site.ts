@@ -28,5 +28,10 @@ export const SITE = {
    * Instagram: dejar como null si no hay una URL real.
    * Si se completa con una URL, el enlace aparece automáticamente en el footer.
    */
-  instagram: 'https://www.instagram.com/vientosurluz?stkn=aWljNWFpbjQ2eG9z',
+  instagram: 'https://www.instagram.com/vientosurluz/',
+  instagramHandle: '@vientosurluz',
+  /** Localización comercial declarada por la marca (sin domicilio público). */
+  locality: 'Córdoba',
+  region: 'Córdoba',
+  country: 'AR',
 } as const;

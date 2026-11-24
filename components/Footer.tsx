@@ -4,6 +4,8 @@ import Logo from './Logo';
 import { SITE, WHATSAPP_DISPLAY } from '@/lib/site';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from './icons';
+import { LEGAL_LINKS } from '@/lib/legal';
+import CookieSettingsButton from './consent/CookieSettingsButton';
 
 export default function Footer({ links }: { links: NavLink[] }) {
   return (
@@ -33,7 +35,7 @@ export default function Footer({ links }: { links: NavLink[] }) {
             </ul>
           </nav>
 
-          <div>
+          <div data-analytics-location="footer">
             <p className="label text-cream/45">Contacto</p>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
@@ -55,16 +57,29 @@ export default function Footer({ links }: { links: NavLink[] }) {
                     rel="noopener noreferrer"
                     className="break-words text-cream/75 transition-colors hover:text-cream"
                   >
-                    Instagram
+                    Instagram {SITE.instagramHandle}
                   </a>
                 </li>
               )}
+              <li className="text-cream/60">Córdoba Capital, Argentina</li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-cream/15 pt-6 text-xs text-cream/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Viento Sur. Lámparas de diseño, Argentina.</p>
+          <nav aria-label="Información legal">
+            <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {LEGAL_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="transition-colors hover:text-cream">{link.label}</Link>
+                </li>
+              ))}
+              <li>
+                <CookieSettingsButton className="transition-colors hover:text-cream" />
+              </li>
+            </ul>
+          </nav>
           <p>Desarrollado por <span className="font-medium text-cream/70">Pragma</span></p>
         </div>
       </div>
