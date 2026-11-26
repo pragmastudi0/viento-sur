@@ -39,11 +39,11 @@ export default function CookiePreferences({ initialAnalytics, onSave, onClose }:
         aria-modal="true"
         aria-labelledby="cookie-prefs-title"
         aria-describedby="cookie-prefs-desc"
-        className="relative w-full max-w-lg animate-fade-in rounded-2xl bg-cream p-5 shadow-2xl sm:p-7"
+        className="relative w-full max-w-lg animate-fade-in rounded-2xl border border-ink/10 bg-cream p-5 sm:p-7"
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id="cookie-prefs-title" className="font-display text-xl font-normal text-ink">Configurar cookies</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar configuración de cookies"
+          <h2 id="cookie-prefs-title" className="font-display text-xl font-normal text-ink">Preferencias de cookies</h2>
+          <button type="button" onClick={onClose} aria-label="Cerrar preferencias de cookies"
             className="-mr-2 -mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink/50 transition-colors hover:text-ink">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -88,10 +88,10 @@ export default function CookiePreferences({ initialAnalytics, onSave, onClose }:
           </li>
         </ul>
 
-        <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
-          <button type="button" onClick={() => onSave(false)} className="btn-primary btn-md">Rechazar no necesarias</button>
-          <button type="button" onClick={() => onSave(analytics)} className="btn-outline btn-md">Guardar preferencias</button>
+        <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
+          <button type="button" onClick={() => onSave(false)} className="btn-primary btn-md">Rechazar las no esenciales</button>
           <button type="button" onClick={() => onSave(true)} className="btn-primary btn-md">Aceptar todas</button>
+          <button type="button" onClick={() => onSave(analytics)} className="btn-outline btn-md sm:col-span-2">Guardar preferencias</button>
         </div>
       </div>
     </div>

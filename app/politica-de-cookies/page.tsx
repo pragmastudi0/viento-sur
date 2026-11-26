@@ -31,18 +31,21 @@ export default function CookiePolicyPage() {
     >
       <div className="rounded-2xl border border-ink/10 bg-sage-tint/60 p-5">
         <p className="text-sm text-ink/75">Podés revisar o cambiar tu elección ahora mismo.</p>
-        <CookieSettingsButton className="btn-primary btn-md mt-3 !no-underline">Configurar cookies</CookieSettingsButton>
+        <CookieSettingsButton className="btn-primary btn-md mt-3 !no-underline">Preferencias de cookies</CookieSettingsButton>
       </div>
 
       <h2>1. Qué son las cookies</h2>
       <p>Las cookies son pequeños archivos que un sitio guarda en tu navegador. Tecnologías similares, como el almacenamiento local (localStorage), cumplen funciones parecidas. Algunas son imprescindibles para que el sitio funcione; otras son opcionales y solo se activan si las aceptás.</p>
 
-      <h2>2. Categorías que usamos</h2>
-      <ul>
-        <li><strong>Necesarias:</strong> permiten el funcionamiento básico, como el carrito y recordar tu elección de cookies. No pueden desactivarse desde el panel, aunque podés borrarlas desde tu navegador.</li>
-        <li><strong>Analíticas (opcionales):</strong> nos ayudan a entender cómo se usa el sitio para mejorarlo. Solo se cargan si las aceptás.</li>
-      </ul>
-      <p>No usamos cookies publicitarias, de redes sociales ni de seguimiento entre sitios. En Google Consent Mode, los permisos publicitarios (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code>) permanecen siempre denegados.</p>
+      <h2>2. Categorías</h2>
+      <h3>Necesarias</h3>
+      <p>Permiten el funcionamiento básico del sitio: guardar el carrito y recordar tu elección sobre cookies. También incluyen la cookie de sesión del panel de administración, que solo se crea cuando inicia sesión una persona autorizada. No requieren consentimiento y no pueden desactivarse desde el panel, aunque podés borrarlas desde tu navegador.</p>
+      <h3>De preferencias</h3>
+      <p>El sitio no usa cookies de preferencias (por ejemplo, de idioma o apariencia). La única elección que recordamos es tu decisión sobre cookies, que se guarda como almacenamiento necesario.</p>
+      <h3>Analíticas (opcionales)</h3>
+      <p>Nos ayudan a entender cómo se usa el sitio para mejorarlo: Google Analytics 4 y Vercel Web Analytics. Solo se cargan si las aceptás.</p>
+      <h3>De marketing</h3>
+      <p>No usamos cookies publicitarias, píxeles de redes sociales ni seguimiento entre sitios. En Google Consent Mode, los permisos publicitarios (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code>) permanecen siempre denegados.</p>
 
       <h2>3. Detalle de cookies y tecnologías</h2>
       <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
@@ -73,8 +76,8 @@ export default function CookiePolicyPage() {
       <p className="text-sm">Las duraciones de Google Analytics corresponden a la configuración predeterminada documentada por Google. Más información: <a href="https://developers.google.com/tag-platform/security/concepts/cookies" target="_blank" rel="noopener noreferrer">cookies de Google</a> y <a href="https://vercel.com/docs/analytics/privacy-policy" target="_blank" rel="noopener noreferrer">privacidad de Vercel Web Analytics</a>.</p>
 
       <h2>4. Cómo aceptar, rechazar o cambiar tu elección</h2>
-      <p>En tu primera visita te mostramos un aviso con tres opciones de igual relevancia: <strong>Aceptar todas</strong>, <strong>Rechazar no necesarias</strong> o <strong>Configurar</strong>. Hasta que aceptes, no se carga ninguna herramienta de analítica. Rechazar no limita la navegación ni el uso del carrito.</p>
-      <p>Podés cambiar o retirar tu consentimiento cuando quieras desde el enlace “Configurar cookies” al pie de cada página. Si retirás el consentimiento, dejamos de medir y eliminamos las cookies de Google Analytics de este sitio.</p>
+      <p>En tu primera visita te mostramos un aviso con tres opciones: <strong>Aceptar todas</strong>, <strong>Rechazar las no esenciales</strong> (ambas con la misma visibilidad) o <strong>Personalizar</strong>. Hasta que aceptes, no se carga ninguna herramienta de analítica. Rechazar no limita la navegación ni el uso del carrito.</p>
+      <p>Podés cambiar o retirar tu consentimiento cuando quieras desde el enlace “Preferencias de cookies” al pie de cada página. Si retirás el consentimiento, dejamos de medir y eliminamos las cookies de Google Analytics de este sitio.</p>
 
       <h2>5. Cómo eliminar cookies desde el navegador</h2>
       <p>También podés borrar las cookies y los datos de sitios desde la configuración de tu navegador:</p>

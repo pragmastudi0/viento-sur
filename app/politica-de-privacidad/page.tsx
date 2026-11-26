@@ -33,9 +33,11 @@ export default function PrivacyPolicyPage() {
       <p>El sitio no tiene formularios de registro ni cuentas de clientes. Al navegar, nuestro proveedor de alojamiento procesa datos técnicos necesarios para entregar las páginas (como la dirección IP, el tipo de navegador y la página solicitada).</p>
       <h3>b) Carrito de compras</h3>
       <p>Los productos que agregás al carrito se guardan únicamente en tu navegador (almacenamiento local). Antes de enviar el pedido, el sitio consulta al servidor solo los identificadores de los productos para verificar precios y disponibilidad en el catálogo; no se envían ni guardan datos personales.</p>
-      <h3>c) Consultas y pedidos por WhatsApp</h3>
-      <p>Cuando hacés clic en un botón de WhatsApp, se abre esa aplicación con un mensaje prearmado. Si decidís enviarlo, recibimos tu número de teléfono, el nombre de tu perfil y el contenido de la conversación (por ejemplo, los productos elegidos y, si los compartís, tu nombre, dirección o provincia para coordinar la entrega).</p>
-      <h3>d) Analítica (solo con tu consentimiento)</h3>
+      <h3>c) Formularios de contacto y consultas comerciales</h3>
+      <p>El sitio no tiene formularios de contacto, de presupuesto ni de suscripción: no recopila nombres, teléfonos ni correos a través de la web. Las consultas comerciales, incluidos los pedidos de productos personalizados, se canalizan por WhatsApp o por mensajes directos de Instagram.</p>
+      <h3>d) Consultas y pedidos por WhatsApp e Instagram</h3>
+      <p>Cuando hacés clic en un botón de WhatsApp, se abre esa aplicación con un mensaje prearmado. Si decidís enviarlo, recibimos tu número de teléfono, el nombre de tu perfil y el contenido de la conversación (por ejemplo, los productos elegidos y, si los compartís, tu nombre, dirección o provincia para coordinar la entrega). Si nos escribís por Instagram, recibimos tu usuario y el contenido del mensaje.</p>
+      <h3>e) Analítica (solo con tu consentimiento)</h3>
       <p>Si aceptás las cookies analíticas, usamos Google Analytics 4 y Vercel Web Analytics para obtener estadísticas agregadas: páginas visitadas, dispositivo, ubicación aproximada (país o ciudad), origen de la visita e interacciones como consultas por WhatsApp o productos agregados al carrito. No enviamos a estas herramientas tu nombre, teléfono, correo ni el contenido de tus mensajes. Las señales publicitarias de Google están desactivadas.</p>
 
       <h2>3. Para qué usamos los datos y con qué base</h2>
@@ -53,7 +55,7 @@ export default function PrivacyPolicyPage() {
         <li><strong>Google LLC</strong> (Estados Unidos): Google Analytics 4, solo con tu consentimiento. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de privacidad</a>.</li>
         <li><strong>WhatsApp (Meta Platforms)</strong>: canal de mensajería que elegís usar para contactarnos; trata tus datos bajo sus propias condiciones. <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Política de privacidad</a>.</li>
       </ul>
-      <p>Los enlaces a Instagram llevan a una plataforma de terceros con su propia política de privacidad.</p>
+      <p>Instagram (también de Meta Platforms) es una plataforma de terceros: si nos escribís por allí, trata tus datos según su propia <a href="https://privacycenter.instagram.com/policy" target="_blank" rel="noopener noreferrer">política de privacidad</a>.</p>
 
       <h2>5. Transferencias internacionales</h2>
       <p>Algunos de estos proveedores procesan datos fuera de la Argentina, principalmente en Estados Unidos. Estas transferencias se realizan en el marco de los servicios contratados y de las garantías que cada proveedor ofrece en sus condiciones. <LegalValue value={null} hint="validar con asesoría legal el mecanismo de transferencia aplicable según la Ley 25.326" /></p>
@@ -61,15 +63,22 @@ export default function PrivacyPolicyPage() {
       <h2>6. Plazos de conservación</h2>
       <ul>
         <li><strong>Carrito:</strong> permanece en tu navegador hasta que lo vacíes o borres los datos del sitio.</li>
-        <li><strong>Conversaciones de WhatsApp:</strong> <LegalValue value={null} hint="definir plazo de conservación de consultas y pedidos" /></li>
+        <li><strong>Conversaciones de WhatsApp e Instagram:</strong> <LegalValue value={null} hint="definir plazo de conservación de consultas y pedidos" /></li>
         <li><strong>Google Analytics 4:</strong> los datos a nivel de usuario y evento se conservan durante <LegalValue value={LEGAL.ga4Retention} hint="período configurado en GA4" />; los informes agregados pueden mantenerse por más tiempo.</li>
         <li><strong>Datos técnicos de alojamiento:</strong> según los plazos del proveedor de hosting.</li>
       </ul>
 
       <h2>7. Tus derechos</h2>
-      <p>Podés solicitar el acceso, la rectificación, la actualización y la supresión de tus datos personales, así como retirar el consentimiento otorgado. Para retirar el consentimiento de analítica alcanza con usar <CookieSettingsButton className="underline underline-offset-2 hover:text-ink">Configurar cookies</CookieSettingsButton>.</p>
+      <p>Podés solicitar el acceso, la rectificación, la actualización y la supresión de tus datos personales, así como retirar el consentimiento otorgado. Para retirar el consentimiento de analítica alcanza con usar <CookieSettingsButton className="underline underline-offset-2 hover:text-ink">Preferencias de cookies</CookieSettingsButton>.</p>
       <p>Para ejercer los demás derechos, escribinos a <LegalValue value={LEGAL.privacyEmail} hint="correo de contacto" /> o por WhatsApp indicando qué solicitás. Podemos pedirte que acredites tu identidad. Responderemos dentro de los plazos legales: 10 días corridos para el acceso y 5 días hábiles para la rectificación, actualización o supresión (arts. 14 y 16 de la Ley 25.326).</p>
       <p>El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales. Más información en <a href="https://www.argentina.gob.ar/aaip" target="_blank" rel="noopener noreferrer">argentina.gob.ar/aaip</a>.</p>
+
+      <h3>Canales para ejercer tus derechos</h3>
+      <ul>
+        <li><strong>Correo electrónico:</strong> <LegalValue value={LEGAL.privacyEmail} hint="correo para solicitudes de datos personales" /></li>
+        <li><strong>WhatsApp:</strong> desde la página de <Link href="/contacto">contacto</Link>, indicando “Datos personales” y el derecho que querés ejercer (acceso, rectificación, actualización o supresión).</li>
+        <li><strong>Preferencias de cookies:</strong> <CookieSettingsButton className="underline underline-offset-2 hover:text-ink">modificá o retirá tu consentimiento</CookieSettingsButton> en cualquier momento.</li>
+      </ul>
 
       <h2>8. Seguridad</h2>
       <p>El sitio se sirve exclusivamente por HTTPS, el panel de administración requiere autenticación y está excluido de los buscadores, y las claves de servicio se guardan solo del lado del servidor. Ningún sistema es completamente infalible, pero aplicamos medidas razonables para proteger la información.</p>

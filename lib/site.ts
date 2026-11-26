@@ -22,14 +22,19 @@ export const SITE = {
   tagline: 'Iluminación que transforma espacios.',
   description:
     'Iluminación de diseño creada y fabricada en Córdoba. Lámparas impresas en 3D para darle calidez y personalidad a cada espacio.',
-  /** URL pública del sitio (se usa en metadata, sitemap y Open Graph). Actualizar tras el deploy. */
-  url: process.env.SITE_URL || 'https://viento-sur-nu.vercel.app',
+  /** URL pública oficial (metadata, canonical, sitemap y Open Graph). En Vercel, SITE_URL debe coincidir. */
+  url: process.env.SITE_URL || 'https://www.vientosurluz.com',
   /**
    * Instagram: dejar como null si no hay una URL real.
    * Si se completa con una URL, el enlace aparece automáticamente en el footer.
    */
   instagram: 'https://www.instagram.com/vientosurluz/',
   instagramHandle: '@vientosurluz',
+  /**
+   * Crédito del desarrollo en el footer. Si `url` es null se muestra solo el nombre,
+   * sin enlace (no se inventa una dirección).
+   */
+  developer: { name: 'Pragma', url: 'https://pragmastudio.com.ar' as string | null },
   /** Localización comercial declarada por la marca (sin domicilio público). */
   locality: 'Córdoba',
   region: 'Córdoba',
