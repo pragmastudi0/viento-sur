@@ -8,13 +8,13 @@
  */
 export const LEGAL = {
   /** Nombre completo o razón social del responsable del tratamiento. */
-  ownerName: null as string | null,
-  /** CUIT / CUIL del titular. */
-  taxId: null as string | null,
+  ownerName: 'Bernardo Cima' as string | null,
+  /** CUIL del titular (persona humana). */
+  taxId: '20-42640808-3' as string | null,
   /** Domicilio legal (calle, número, localidad, provincia). */
-  legalAddress: null as string | null,
+  legalAddress: 'Díaz Usandivaras 923, Córdoba Capital, Córdoba' as string | null,
   /** Correo electrónico para consultas y ejercicio de derechos de datos personales. */
-  privacyEmail: null as string | null,
+  privacyEmail: 'vientosurluz@gmail.com' as string | null,
   /** Período de retención configurado en GA4 (Administrar → Recopilación de datos → Retención). */
   ga4Retention: null as string | null,
   /** Fecha de última actualización de los documentos legales. */
@@ -33,3 +33,12 @@ export const LEGAL_LINKS = [
   { href: '/politica-de-cookies', label: 'Política de cookies' },
   { href: '/terminos-y-condiciones', label: 'Términos y condiciones' },
 ] as const;
+
+/** Garantía declarada por el titular (texto textual). Se usa en /cuidados-y-garantia y en los términos. */
+export const WARRANTY = {
+  months: 12,
+  text: 'El producto cuenta con una garantía de 12 meses a partir de la fecha de recepción. La cobertura comprende fallas eléctricas, desperfectos de montaje y roturas atribuibles a defectos de fabricación, siempre que se hayan respetado las indicaciones de uso y cuidado del producto.',
+} as const;
+
+export const CARE_PAGE = { href: '/cuidados-y-garantia', label: 'Cuidados y garantía' } as const;
+export const CARE_MANUAL_PDF = '/manual-de-cuidados-viento-sur.pdf';

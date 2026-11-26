@@ -8,6 +8,8 @@ import { formatPrice } from '@/lib/currency';
 import { waLink, productInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from './icons';
 import { trackEvent } from '@/lib/analytics';
+import Link from 'next/link';
+import { CARE_PAGE, WARRANTY } from '@/lib/legal';
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { addItem, openCart } = useCart();
@@ -149,6 +151,13 @@ export default function ProductDetails({ product }: { product: Product }) {
         <WhatsAppIcon />
         Consultar por este modelo
       </a>
+
+      <p className="mt-4 text-center text-sm text-ink/60">
+        Garantía de {WARRANTY.months} meses ·{' '}
+        <Link href={CARE_PAGE.href} className="underline underline-offset-2 transition-colors hover:text-ink">
+          Ver cuidados y garantía
+        </Link>
+      </p>
     </div>
   );
 }

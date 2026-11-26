@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
       <h2>1. Responsable del tratamiento</h2>
       <ul>
         <li><strong>Titular:</strong> <LegalValue value={LEGAL.ownerName} hint="nombre o razón social" /> (marca comercial “{SITE.name}”).</li>
-        <li><strong>CUIT:</strong> <LegalValue value={LEGAL.taxId} /></li>
+        <li><strong>CUIL:</strong> <LegalValue value={LEGAL.taxId} /></li>
         <li><strong>Domicilio:</strong> <LegalValue value={LEGAL.legalAddress} /></li>
         <li><strong>Correo electrónico para temas de privacidad:</strong> <LegalValue value={LEGAL.privacyEmail} /></li>
       </ul>

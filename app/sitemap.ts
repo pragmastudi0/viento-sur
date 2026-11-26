@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/lib/site';
-import { LEGAL, LEGAL_LINKS } from '@/lib/legal';
+import { CARE_PAGE, LEGAL, LEGAL_LINKS } from '@/lib/legal';
 import { getActiveCategories } from '@/lib/categories';
 import { categoryHref } from '@/lib/category-types';
 import { getPublishedProducts } from '@/lib/catalog';
@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE.url.replace(/\/$/, '');
 
   // Sin lastModified en rutas estáticas: una fecha “ahora” en cada request es una señal falsa para los buscadores.
-  const staticPaths = ['', '/catalogo', '/nosotros', '/personalizados', '/contacto'];
+  const staticPaths = ['', '/catalogo', '/nosotros', '/personalizados', '/contacto', CARE_PAGE.href];
   // Las páginas legales entran al sitemap recién cuando dejan de estar en revisión (antes son noindex).
   if (!LEGAL.pendingReview) staticPaths.push(...LEGAL_LINKS.map(link => link.href));
   const staticRoutes: MetadataRoute.Sitemap = staticPaths.map(path => ({ url: `${base}${path}` }));

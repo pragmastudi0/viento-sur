@@ -4,6 +4,7 @@ import { LEGAL, LEGAL_LINKS, LEGAL_PLACEHOLDER } from '@/lib/legal';
 
 /** Valor legal o marcador visible “[A completar por el titular]” si todavía no se cargó. */
 export function LegalValue({ value, hint }: { value: string | null; hint?: string }) {
+  if (value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return <a href={`mailto:${value}`}>{value}</a>;
   if (value) return <>{value}</>;
   return (
     <mark className="rounded bg-glow/30 px-1 text-ink" title={hint}>

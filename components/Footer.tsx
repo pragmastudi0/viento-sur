@@ -4,7 +4,7 @@ import Logo from './Logo';
 import { SITE, WHATSAPP_DISPLAY } from '@/lib/site';
 import { waLink, generalInquiryMessage } from '@/lib/whatsapp';
 import { InstagramIcon, WhatsAppIcon } from './icons';
-import { LEGAL_LINKS } from '@/lib/legal';
+import { CARE_PAGE, LEGAL_LINKS } from '@/lib/legal';
 import CookieSettingsButton from './consent/CookieSettingsButton';
 
 /** Páginas institucionales; el resto de los enlaces de navegación (salvo Inicio) forman la colección. */
@@ -30,7 +30,7 @@ function LinkColumn({ title, links }: { title: string; links: NavLink[] }) {
 
 export default function Footer({ links }: { links: NavLink[] }) {
   const collection = links.filter(link => link.href !== '/' && !BRAND_HREFS.includes(link.href));
-  const brand = BRAND_HREFS.flatMap(href => links.filter(link => link.href === href));
+  const brand = [...BRAND_HREFS.flatMap(href => links.filter(link => link.href === href)), CARE_PAGE];
   const developer = SITE.developer;
 
   return (
