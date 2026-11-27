@@ -16,7 +16,7 @@ export const LEGAL = {
   /** Correo electrónico para consultas y ejercicio de derechos de datos personales. */
   privacyEmail: 'vientosurluz@gmail.com' as string | null,
   /** Período de retención configurado en GA4 (Administrar → Recopilación de datos → Retención). */
-  ga4Retention: null as string | null,
+  ga4Retention: '14 meses' as string | null,
   /** Fecha de última actualización de los documentos legales. */
   updatedAt: '24 de noviembre de 2026',
   /**
