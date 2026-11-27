@@ -28,7 +28,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-ink-deep/40 to-transparent" />
 
       <div className="container-page relative z-10 pb-14 sm:pb-20">
-        <div className="max-w-xl animate-fade-up">
+        <div className="max-w-xl animate-fade-up" data-analytics-location="hero">
           <h1 className="font-display text-4xl font-light leading-[1.05] text-cream sm:text-5xl lg:text-6xl">
             {SITE.tagline}
           </h1>
@@ -37,7 +37,7 @@ export default function Hero() {
             cada ambiente.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/catalogo" className="btn bg-cream text-ink hover:bg-white btn-lg">
+            <Link href="/catalogo" data-cta="hero_ver_coleccion" className="btn bg-cream text-ink hover:bg-white btn-lg">
               Ver colección
             </Link>
             <a

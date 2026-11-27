@@ -7,6 +7,9 @@ import { useToast } from '@/context/ToastContext';
 import { formatPrice } from '@/lib/currency';
 import { waLink, productInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from './icons';
+import { trackEvent } from '@/lib/analytics';
+import Link from 'next/link';
+import { CARE_PAGE, WARRANTY } from '@/lib/legal';
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { addItem, openCart } = useCart();
@@ -28,6 +31,11 @@ export default function ProductDetails({ product }: { product: Product }) {
       variantId: variant.id,
       variantLabel: variant.label,
       quantity,
+    });
+    trackEvent('add_to_cart', {
+      currency: 'ARS',
+      value: product.price * quantity,
+      items: [{ item_id: product.slug, item_name: product.name, item_category: product.categoryLabel, item_variant: variant.label, price: product.price, quantity }],
     });
     showToast('Producto agregado', {
       actionLabel: 'Ver carrito',
@@ -134,6 +142,8 @@ export default function ProductDetails({ product }: { product: Product }) {
 
       <a
         href={waLink(productInquiryMessage(product.name))}
+        data-analytics-location="product_details"
+        data-inquiry="product"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/20 px-5 py-3 text-sm text-ink/80 transition-colors hover:border-ink hover:text-ink"
@@ -141,6 +151,13 @@ export default function ProductDetails({ product }: { product: Product }) {
         <WhatsAppIcon />
         Consultar por este modelo
       </a>
+
+      <p className="mt-4 text-center text-sm text-ink/60">
+        Garantía de {WARRANTY.months} meses ·{' '}
+        <Link href={CARE_PAGE.href} className="underline underline-offset-2 transition-colors hover:text-ink">
+          Ver cuidados y garantía
+        </Link>
+      </p>
     </div>
   );
 }

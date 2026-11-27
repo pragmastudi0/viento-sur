@@ -8,6 +8,7 @@ import { orderMessage, waLink } from '@/lib/whatsapp';
 import { reconcileCart } from '@/lib/cart-reconciliation';
 import CartItem from './CartItem';
 import { WhatsAppIcon } from './icons';
+import { trackEvent } from '@/lib/analytics';
 
 export default function CartDrawer() {
   const { items, count, subtotal, isOpen, closeCart, mounted, replaceItems } = useCart();
@@ -47,6 +48,13 @@ export default function CartDrawer() {
       const message = orderMessage(
         items.map((i) => ({ name: i.name, variantLabel: i.variantLabel, quantity: i.quantity, price: i.price })),
       );
+      // Conversión principal: pedido enviado a WhatsApp con el carrito verificado.
+      trackEvent('generate_lead', {
+        currency: 'ARS',
+        value: subtotal,
+        lead_source: 'whatsapp_order',
+        items: items.map((i) => ({ item_id: i.slug, item_name: i.name, item_variant: i.variantLabel, price: i.price, quantity: i.quantity })),
+      });
       if (whatsappWindow) whatsappWindow.location.href = waLink(message);
       else window.location.assign(waLink(message));
       closeCart();

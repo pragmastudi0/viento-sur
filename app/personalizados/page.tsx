@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 import CustomProducts from '@/components/CustomProducts';
 import { waLink, customInquiryMessage } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/icons';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Personalizados',
+export const metadata: Metadata = pageMetadata({
+  title: 'Lámparas personalizadas a medida',
   description:
-    'Lámparas personalizadas Viento Sur: elegí la terminación de la estructura y adaptamos las pantallas a tu espacio. También realizamos modelos especiales a pedido.',
-  alternates: { canonical: '/personalizados' },
-};
+    'Lámparas personalizadas Viento Sur: elegí la terminación de la estructura (negro, grafito o bronce) y adaptamos las pantallas a tu espacio. También realizamos modelos especiales a pedido.',
+  path: '/personalizados',
+});
 
 const STEPS = [
   {
@@ -54,9 +55,10 @@ export default function PersonalizadosPage() {
           ))}
         </div>
 
-        <div className="mt-12">
+        <div className="mt-12" data-analytics-location="personalizados_page">
           <a
             href={waLink(customInquiryMessage())}
+            data-inquiry="custom"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp btn-lg"

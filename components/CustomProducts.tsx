@@ -33,9 +33,10 @@ export default function CustomProducts() {
               lo que estés buscando.
             </p>
           </div>
-          <div className="mt-8">
+          <div className="mt-8" data-analytics-location="custom_section">
             <a
               href={waLink(customInquiryMessage())}
+              data-inquiry="custom"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-whatsapp btn-lg"
